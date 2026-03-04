@@ -31,7 +31,14 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+Verify alignment with `.specify/memory/constitution.md`:
+
+- **Angular**: Angular 18+, standalone components, signals, OnPush, @if/@for/@switch.
+- **Types**: strict TypeScript, explicit public APIs; no any.
+- **State**: Smart/dumb split; signals/store; lazy routes.
+- **Testing**: Specs for every component/service; smoke + key behavior; 80%+ on logic-heavy code.
+- **Security**: Sanitize input; typed HTTP; route guards; no frontend-only auth.
+- **Scope**: Single-user, local MVP; no multi-tenant or cloud requirement.
 
 ## Project Structure
 
