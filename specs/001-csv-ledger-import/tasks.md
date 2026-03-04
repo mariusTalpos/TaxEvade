@@ -24,9 +24,9 @@
 
 **Purpose**: Project initialization and Angular 18+ shell
 
-- [ ] T001 Create Angular 18+ project with standalone components, strict TypeScript, and default app shell at repository root (ng new or equivalent)
-- [ ] T002 Configure ESLint and Prettier per constitution in project root and angular.json / eslint config
-- [ ] T003 [P] Create folder structure: src/app/core/services, src/app/core/models, src/app/features/ledger/containers/ledger-page, src/app/features/ledger/components/transaction-list, src/app/features/ledger/components/transaction-filters, src/app/features/ledger/components/import-file-picker
+- [x] T001 Create Angular 18+ project with standalone components, strict TypeScript, and default app shell at repository root (ng new or equivalent)
+- [x] T002 Configure ESLint and Prettier per constitution in project root and angular.json / eslint config
+- [x] T003 [P] Create folder structure: src/app/core/services, src/app/core/models, src/app/features/ledger/containers/ledger-page, src/app/features/ledger/components/transaction-list, src/app/features/ledger/components/transaction-filters, src/app/features/ledger/components/import-file-picker
 
 ---
 
@@ -34,10 +34,10 @@
 
 **Purpose**: Core types and storage that ALL user stories depend on. No user story work until this phase is complete.
 
-- [ ] T004 [P] Create Transaction and ImportResult interfaces in src/app/core/models/transaction.ts per contracts/normalized-transaction.md and data-model.md
-- [ ] T005 Implement LedgerStorageService: IndexedDB open, transactions store with indexes (date, account), getAll(), addTransactions(candidates, account) with deduplication by (date, amount, description, account), return ImportResult (added, skippedAsDuplicate, skippedInvalid) in src/app/core/services/ledger-storage.service.ts
-- [ ] T006 Add LedgerStorageService spec (smoke + getAll/addTransactions/dedupe behavior) in src/app/core/services/ledger-storage.service.spec.ts
-- [ ] T007 Add lazy route for ledger feature in src/app/app.routes.ts and create ledger.routes.ts in src/app/features/ledger/ledger.routes.ts with default path to ledger-page
+- [x] T004 [P] Create Transaction and ImportResult interfaces in src/app/core/models/transaction.ts per contracts/normalized-transaction.md and data-model.md
+- [x] T005 Implement LedgerStorageService: IndexedDB open, transactions store with indexes (date, account), getAll(), addTransactions(candidates, account) with deduplication by (date, amount, description, account), return ImportResult (added, skippedAsDuplicate, skippedInvalid) in src/app/core/services/ledger-storage.service.ts
+- [x] T006 Add LedgerStorageService spec (smoke + getAll/addTransactions/dedupe behavior) in src/app/core/services/ledger-storage.service.spec.ts
+- [x] T007 Add lazy route for ledger feature in src/app/app.routes.ts and create ledger.routes.ts in src/app/features/ledger/ledger.routes.ts with default path to ledger-page
 
 **Checkpoint**: Types and persistence ready; ledger route loads. User story implementation can begin.
 
@@ -51,17 +51,17 @@
 
 ### Tests for User Story 1
 
-- [ ] T008 [P] [US1] Add CsvParserService spec (smoke + parse valid 5-column quoted CSV, normalize date/amount/description; reject invalid format) in src/app/core/services/csv-parser.service.spec.ts
-- [ ] T009 [P] [US1] Add ImportFilePickerComponent spec (smoke + file selection emits file) in src/app/features/ledger/components/import-file-picker/import-file-picker.component.spec.ts
-- [ ] T010 [US1] Add LedgerPageContainer spec (smoke + import flow: file -> parse -> storage -> result displayed; error on invalid file) in src/app/features/ledger/containers/ledger-page/ledger-page.component.spec.ts
+- [x] T008 [P] [US1] Add CsvParserService spec (smoke + parse valid 5-column quoted CSV, normalize date/amount/description; reject invalid format) in src/app/core/services/csv-parser.service.spec.ts
+- [x] T009 [P] [US1] Add ImportFilePickerComponent spec (smoke + file selection emits file) in src/app/features/ledger/components/import-file-picker/import-file-picker.component.spec.ts
+- [x] T010 [US1] Add LedgerPageContainer spec (smoke + import flow: file -> parse -> storage -> result displayed; error on invalid file) in src/app/features/ledger/containers/ledger-page/ledger-page.component.spec.ts
 
 ### Implementation for User Story 1
 
-- [ ] T011 [P] [US1] Implement CsvParserService: parse Wells Fargo 5-column quoted CSV per contracts/wells-fargo-csv.md (columns 0=date, 1=amount, 4=description; normalize date to YYYY-MM-DD, amount as number; return Transaction-like rows without id/account) in src/app/core/services/csv-parser.service.ts
-- [ ] T012 [P] [US1] Create ImportFilePickerComponent (standalone, OnPush): file input, accept .csv, output file selected; no business logic in src/app/features/ledger/components/import-file-picker/import-file-picker.component.ts
-- [ ] T013 [US1] Create LedgerPageContainer (standalone, signals, OnPush): inject LedgerStorageService and CsvParserService; on file selected run parser, assign account (default or user input), call storage.addTransactions, store ImportResult in signal and display (added, skippedInvalid, error) in src/app/features/ledger/containers/ledger-page/ledger-page.component.ts
-- [ ] T014 [US1] In LedgerPageContainer handle empty file and unsupported/invalid format: set error message in result and show user-facing message per FR-010; no partial data written in src/app/features/ledger/containers/ledger-page/ledger-page.component.ts
-- [ ] T015 [US1] Wire ledger route to LedgerPageContainer and add ImportFilePickerComponent to template; display import result message (e.g. "X transactions added" or "No transactions found" / error) in src/app/features/ledger/containers/ledger-page/
+- [x] T011 [P] [US1] Implement CsvParserService: parse Wells Fargo 5-column quoted CSV per contracts/wells-fargo-csv.md (columns 0=date, 1=amount, 4=description; normalize date to YYYY-MM-DD, amount as number; return Transaction-like rows without id/account) in src/app/core/services/csv-parser.service.ts
+- [x] T012 [P] [US1] Create ImportFilePickerComponent (standalone, OnPush): file input, accept .csv, output file selected; no business logic in src/app/features/ledger/components/import-file-picker/import-file-picker.component.ts
+- [x] T013 [US1] Create LedgerPageContainer (standalone, signals, OnPush): inject LedgerStorageService and CsvParserService; on file selected run parser, assign account (default or user input), call storage.addTransactions, store ImportResult in signal and display (added, skippedInvalid, error) in src/app/features/ledger/containers/ledger-page/ledger-page.component.ts
+- [x] T014 [US1] In LedgerPageContainer handle empty file and unsupported/invalid format: set error message in result and show user-facing message per FR-010; no partial data written in src/app/features/ledger/containers/ledger-page/ledger-page.component.ts
+- [x] T015 [US1] Wire ledger route to LedgerPageContainer and add ImportFilePickerComponent to template; display import result message (e.g. "X transactions added" or "No transactions found" / error) in src/app/features/ledger/containers/ledger-page/
 
 **Checkpoint**: User Story 1 is complete. User can import a Wells Fargo CSV and see confirmation or error; transactions persist in IndexedDB.
 
@@ -75,16 +75,16 @@
 
 ### Tests for User Story 2
 
-- [ ] T016 [P] [US2] Add TransactionListComponent spec (smoke + renders transaction rows with date, description, amount, account) in src/app/features/ledger/components/transaction-list/transaction-list.component.spec.ts
-- [ ] T017 [P] [US2] Add TransactionFiltersComponent spec (smoke + search and filter outputs emit when user changes values) in src/app/features/ledger/components/transaction-filters/transaction-filters.component.spec.ts
+- [x] T016 [P] [US2] Add TransactionListComponent spec (smoke + renders transaction rows with date, description, amount, account) in src/app/features/ledger/components/transaction-list/transaction-list.component.spec.ts
+- [x] T017 [P] [US2] Add TransactionFiltersComponent spec (smoke + search and filter outputs emit when user changes values) in src/app/features/ledger/components/transaction-filters/transaction-filters.component.spec.ts
 
 ### Implementation for User Story 2
 
-- [ ] T018 [P] [US2] Create TransactionListComponent (standalone, OnPush): input signal or array of Transaction; display table/list with date, description, amount, inflow/outflow, account in src/app/features/ledger/components/transaction-list/transaction-list.component.ts
-- [ ] T019 [P] [US2] Create TransactionFiltersComponent (standalone, OnPush): inputs for search query, date range, account, inflow/outflow; output events or model for filter changes in src/app/features/ledger/components/transaction-filters/transaction-filters.component.ts
-- [ ] T020 [US2] In LedgerPageContainer load transactions from LedgerStorageService.getAll() into a signal; add signals for search query and filter state; compute filtered list signal (search on description/amount, filter by date range, account, inflow/outflow) in src/app/features/ledger/containers/ledger-page/ledger-page.component.ts
-- [ ] T021 [US2] Wire TransactionFiltersComponent and TransactionListComponent in LedgerPageContainer template; pass filtered transactions to list; ensure list updates when search or filters change in src/app/features/ledger/containers/ledger-page/ledger-page.component.ts
-- [ ] T027 [US2] Add pagination to the transaction list with user-selectable rows per page (e.g., 25, 50, 100) in src/app/features/ledger/components/transaction-list/transaction-list.component.ts and wire page size and current page in LedgerPageContainer per FR-010 (spec edge case)
+- [x] T018 [P] [US2] Create TransactionListComponent (standalone, OnPush): input signal or array of Transaction; display table/list with date, description, amount, inflow/outflow, account in src/app/features/ledger/components/transaction-list/transaction-list.component.ts
+- [x] T019 [P] [US2] Create TransactionFiltersComponent (standalone, OnPush): inputs for search query, date range, account, inflow/outflow; output events or model for filter changes in src/app/features/ledger/components/transaction-filters/transaction-filters.component.ts
+- [x] T020 [US2] In LedgerPageContainer load transactions from LedgerStorageService.getAll() into a signal; add signals for search query and filter state; compute filtered list signal (search on description/amount, filter by date range, account, inflow/outflow) in src/app/features/ledger/containers/ledger-page/ledger-page.component.ts
+- [x] T021 [US2] Wire TransactionFiltersComponent and TransactionListComponent in LedgerPageContainer template; pass filtered transactions to list; ensure list updates when search or filters change in src/app/features/ledger/containers/ledger-page/ledger-page.component.ts
+- [x] T027 [US2] Add pagination to the transaction list with user-selectable rows per page (e.g., 25, 50, 100) in src/app/features/ledger/components/transaction-list/transaction-list.component.ts and wire page size and current page in LedgerPageContainer per FR-010 (spec edge case)
 
 **Checkpoint**: User Story 2 is complete. User can view, search, filter, and paginate the transaction list with selectable rows per page.
 
@@ -98,11 +98,11 @@
 
 ### Tests for User Story 3
 
-- [ ] T022 [US3] Add test in LedgerPageContainer or LedgerStorageService spec: re-import same CSV returns added=0, skippedAsDuplicate=N and no duplicate rows in storage in src/app/features/ledger/containers/ledger-page/ledger-page.component.spec.ts or ledger-storage.service.spec.ts
+- [x] T022 [US3] Add test in LedgerPageContainer or LedgerStorageService spec: re-import same CSV returns added=0, skippedAsDuplicate=N and no duplicate rows in storage in src/app/features/ledger/containers/ledger-page/ledger-page.component.spec.ts or ledger-storage.service.spec.ts
 
 ### Implementation for User Story 3
 
-- [ ] T023 [US3] Ensure ImportResult.skippedAsDuplicate is shown in LedgerPageContainer after import (e.g. "X added, Y duplicates skipped") when user re-imports same or overlapping file in src/app/features/ledger/containers/ledger-page/ledger-page.component.ts
+- [x] T023 [US3] Ensure ImportResult.skippedAsDuplicate is shown in LedgerPageContainer after import (e.g. "X added, Y duplicates skipped") when user re-imports same or overlapping file in src/app/features/ledger/containers/ledger-page/ledger-page.component.ts
 
 **Checkpoint**: User Story 3 is complete. Re-import shows duplicate count and no duplicates in ledger.
 
@@ -112,9 +112,9 @@
 
 **Purpose**: Edge cases, validation, and quality
 
-- [ ] T024 [P] Handle malformed CSV rows: CsvParserService skips invalid rows and includes skippedInvalid in parse result; LedgerPageContainer shows summary (e.g. "X imported, Y rows skipped due to errors") per spec edge cases in src/app/core/services/csv-parser.service.ts and ledger container
-- [ ] T025 Run quickstart.md validation: ng serve, ng test, and manual import/list flow in project root
-- [ ] T026 [P] Code cleanup: ensure OnPush, signals, @if/@for/@switch control flow in templates; no NgModule; ESLint and Prettier pass; tests use Angular Testing Library style (Jasmine, minimal TestBed); 80%+ coverage on logic-heavy code (parser, storage) in src/app/
+- [x] T024 [P] Handle malformed CSV rows: CsvParserService skips invalid rows and includes skippedInvalid in parse result; LedgerPageContainer shows summary (e.g. "X imported, Y rows skipped due to errors") per spec edge cases in src/app/core/services/csv-parser.service.ts and ledger container
+- [x] T025 Run quickstart.md validation: ng serve, ng test, and manual import/list flow in project root
+- [x] T026 [P] Code cleanup: ensure OnPush, signals, @if/@for/@switch control flow in templates; no NgModule; ESLint and Prettier pass; tests use Angular Testing Library style (Jasmine, minimal TestBed); 80%+ coverage on logic-heavy code (parser, storage) in src/app/
 
 ---
 
