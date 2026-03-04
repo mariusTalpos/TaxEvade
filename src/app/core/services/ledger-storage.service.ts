@@ -62,6 +62,37 @@ export class LedgerStorageService {
     });
   }
 
+  async getDistinctAccountNames(): Promise<string[]> {
+    const all = await this.getAll();
+    const set = new Set(all.map((t) => t.account).filter((a) => a?.trim()));
+    return Array.from(set).sort();
+  }
+
+  async clearAll(): Promise<void> {
+    const db = await this.openDb();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      const request = store.clear();
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async deleteByIds(ids: string[]): Promise<void> {
+    if (ids.length === 0) return;
+    const db = await this.openDb();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      for (const id of ids) {
+        store.delete(id);
+      }
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
   async addTransactions(rows: TransactionRow[], account: string): Promise<ImportResult> {
     const db = await this.openDb();
     const existing = await this.getAll();

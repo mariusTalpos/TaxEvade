@@ -14,7 +14,15 @@ import {
   TransactionFiltersComponent,
   LedgerFilters,
 } from '../../components/transaction-filters/transaction-filters.component';
+import { AccountNameInputComponent } from '../../components/account-name-input/account-name-input.component';
+import { ConfirmationDialogComponent } from '../../components/confirmation-dialog/confirmation-dialog.component';
 import { ImportResult, Transaction } from '../../../../core/models/transaction';
+
+export interface ConfirmState {
+  title: string;
+  message: string;
+  onConfirm: () => void;
+}
 
 const DEFAULT_PAGE_SIZE = 25;
 
@@ -22,10 +30,23 @@ const DEFAULT_PAGE_SIZE = 25;
   selector: 'app-ledger-page',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ImportFilePickerComponent, TransactionListComponent, TransactionFiltersComponent],
+  imports: [
+    ImportFilePickerComponent,
+    TransactionListComponent,
+    TransactionFiltersComponent,
+    AccountNameInputComponent,
+    ConfirmationDialogComponent,
+  ],
   template: `
     <h1>Ledger</h1>
-    <app-import-file-picker (fileSelected)="onFileSelected($event)" />
+    <section class="import-section">
+      <h2>Import CSV</h2>
+      <app-account-name-input
+        [suggestions]="accountSuggestions()"
+        (accountSelected)="accountName.set($event)"
+      />
+      <app-import-file-picker (fileSelected)="onFileSelected($event)" />
+    </section>
     @if (importResult(); as result) {
       <div class="import-result">
         @if (result.error) {
@@ -48,6 +69,26 @@ const DEFAULT_PAGE_SIZE = 25;
         }
       </div>
     }
+    @if (confirmState(); as state) {
+      <div class="dialog-overlay" role="presentation">
+        <app-confirmation-dialog
+          [title]="state.title"
+          [message]="state.message"
+          (confirmed)="state.onConfirm(); confirmState.set(null)"
+          (cancelled)="confirmState.set(null)"
+        />
+      </div>
+    }
+    <section class="actions">
+      <button type="button" (click)="onClearAllClick()">Clear all</button>
+      <button
+        type="button"
+        [disabled]="selectedIds().length === 0"
+        (click)="onDeleteSelectedClick()"
+      >
+        Delete selected ({{ selectedIds().length }})
+      </button>
+    </section>
     <app-transaction-filters
       [search]="filterState().search"
       [dateFrom]="filterState().dateFrom"
@@ -62,12 +103,38 @@ const DEFAULT_PAGE_SIZE = 25;
       [pageSize]="pageSize()"
       [currentPage]="currentPage()"
       [totalItems]="filteredList().length"
+      [selectedIds]="selectedIds()"
       (pageSizeChange)="onPageSizeChange($event)"
       (pageChange)="onPageChange($event)"
+      (selectionChange)="selectedIds.set($event)"
     />
   `,
   styles: [
     `
+      .import-section {
+        margin-bottom: 1.5rem;
+      }
+      .import-section app-account-name-input {
+        margin-bottom: 0.5rem;
+      }
+      .dialog-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      }
+      .actions {
+        margin: 1rem 0;
+        display: flex;
+        gap: 0.75rem;
+      }
+      .actions button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
       .import-result {
         margin-top: 1rem;
       }
@@ -83,6 +150,10 @@ export class LedgerPageComponent implements OnInit {
 
   readonly importResult = signal<ImportResult | null>(null);
   readonly transactions = signal<Transaction[]>([]);
+  readonly accountName = signal<string>('');
+  readonly accountSuggestions = signal<string[]>([]);
+  readonly selectedIds = signal<string[]>([]);
+  readonly confirmState = signal<ConfirmState | null>(null);
   readonly filterState = signal<LedgerFilters>({
     search: '',
     dateFrom: '',
@@ -139,6 +210,7 @@ export class LedgerPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.storage.getAll().then((txs) => this.transactions.set(txs));
+    this.storage.getDistinctAccountNames().then((names) => this.accountSuggestions.set(names));
   }
 
   onFiltersChange(f: LedgerFilters): void {
@@ -153,6 +225,37 @@ export class LedgerPageComponent implements OnInit {
 
   onPageChange(page: number): void {
     this.currentPage.set(page);
+  }
+
+  onClearAllClick(): void {
+    this.confirmState.set({
+      title: 'Clear ledger',
+      message: 'Clear all transactions? This cannot be undone.',
+      onConfirm: () => this.doClearAll(),
+    });
+  }
+
+  async doClearAll(): Promise<void> {
+    await this.storage.clearAll();
+    this.transactions.set([]);
+    this.selectedIds.set([]);
+    this.accountSuggestions.set(await this.storage.getDistinctAccountNames());
+  }
+
+  onDeleteSelectedClick(): void {
+    const ids = this.selectedIds();
+    const n = ids.length;
+    this.confirmState.set({
+      title: 'Delete selected',
+      message: `Delete ${n} selected transaction(s)?`,
+      onConfirm: () => this.doDeleteByIds(ids),
+    });
+  }
+
+  async doDeleteByIds(ids: string[]): Promise<void> {
+    await this.storage.deleteByIds(ids);
+    this.transactions.set(await this.storage.getAll());
+    this.selectedIds.set([]);
   }
 
   async onFileSelected(file: File): Promise<void> {
@@ -179,7 +282,16 @@ export class LedgerPageComponent implements OnInit {
       return;
     }
 
-    const account = 'Wells Fargo';
+    const account = this.accountName().trim();
+    if (!account) {
+      this.importResult.set({
+        added: 0,
+        skippedAsDuplicate: 0,
+        skippedInvalid: parseResult.skippedInvalid,
+        error: 'Please enter an account name first.',
+      });
+      return;
+    }
     const result = await this.storage.addTransactions(parseResult.rows, account);
     this.importResult.set({
       ...result,
@@ -187,5 +299,6 @@ export class LedgerPageComponent implements OnInit {
     });
     const txs = await this.storage.getAll();
     this.transactions.set(txs);
+    this.accountSuggestions.set(await this.storage.getDistinctAccountNames());
   }
 }

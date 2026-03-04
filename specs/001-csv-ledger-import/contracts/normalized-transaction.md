@@ -19,7 +19,7 @@ interface Transaction {
 ```
 
 - **id**: Unique, stable (e.g. UUID or hash of date+amount+description+account). Used as primary key in IndexedDB.
-- **date**, **description**, **amount**, **account**: Required; set by parser (date, description, amount) and import context (account).
+- **date**, **description**, **amount**, **account**: Required; set by parser (date, description, amount) and user input at import time (account; required, no fixed default).
 - **importedAt**: Optional; set at insert time.
 
 ## Deduplication Key

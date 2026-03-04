@@ -11,6 +11,15 @@ import { Transaction } from '../../../../core/models/transaction';
     <table>
       <thead>
         <tr>
+          <th class="col-check">
+            <input
+              type="checkbox"
+              [checked]="isAllOnPageSelected()"
+              [indeterminate]="isSomeOnPageSelected()"
+              (change)="onSelectAllPage($event)"
+              aria-label="Select all on page"
+            />
+          </th>
           <th>Date</th>
           <th>Description</th>
           <th>Amount</th>
@@ -21,6 +30,14 @@ import { Transaction } from '../../../../core/models/transaction';
       <tbody>
         @for (t of transactions(); track t.id) {
           <tr>
+            <td class="col-check">
+              <input
+                type="checkbox"
+                [checked]="isSelected(t.id)"
+                (change)="onToggleSelect(t.id)"
+                [attr.aria-label]="'Select transaction ' + t.id"
+              />
+            </td>
             <td>{{ t.date }}</td>
             <td>{{ t.description }}</td>
             <td>{{ t.amount | number: '1.2-2' }}</td>
@@ -29,7 +46,7 @@ import { Transaction } from '../../../../core/models/transaction';
           </tr>
         } @empty {
           <tr>
-            <td colspan="5">No transactions to show.</td>
+            <td colspan="6">No transactions to show.</td>
           </tr>
         }
       </tbody>
@@ -64,6 +81,10 @@ import { Transaction } from '../../../../core/models/transaction';
         padding: 0.5rem;
         text-align: left;
       }
+      .col-check {
+        width: 2.5rem;
+        text-align: center;
+      }
       .pagination {
         margin-top: 1rem;
         display: flex;
@@ -78,6 +99,43 @@ export class TransactionListComponent {
   readonly pageSize = input<number>(25);
   readonly currentPage = input<number>(1);
   readonly totalItems = input<number>(0);
+  readonly selectedIds = input<string[]>([]);
+
+  readonly selectionChange = output<string[]>();
+
+  isSelected(id: string): boolean {
+    return this.selectedIds().includes(id);
+  }
+
+  isAllOnPageSelected(): boolean {
+    const txs = this.transactions();
+    const ids = this.selectedIds();
+    return txs.length > 0 && txs.every((t) => ids.includes(t.id));
+  }
+
+  isSomeOnPageSelected(): boolean {
+    const txs = this.transactions();
+    const ids = this.selectedIds();
+    const selected = txs.filter((t) => ids.includes(t.id));
+    return selected.length > 0 && selected.length < txs.length;
+  }
+
+  onToggleSelect(id: string): void {
+    const ids = this.selectedIds();
+    const set = new Set(ids);
+    if (set.has(id)) set.delete(id);
+    else set.add(id);
+    this.selectionChange.emit(Array.from(set));
+  }
+
+  onSelectAllPage(event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    const txs = this.transactions();
+    const set = new Set(this.selectedIds());
+    if (checked) txs.forEach((t) => set.add(t.id));
+    else txs.forEach((t) => set.delete(t.id));
+    this.selectionChange.emit(Array.from(set));
+  }
 
   totalPages(): number {
     const size = this.pageSize();
