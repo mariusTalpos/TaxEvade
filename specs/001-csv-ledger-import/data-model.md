@@ -34,8 +34,7 @@ The user’s single collection of all transactions. Not a separate stored entity
 **Operations**:
 - Append: add new transactions (after deduplication).
 - Read: query/filter by date range, account, inflow/outflow, and full-text search on description/amount for display.
-
-**State transitions**: Transactions are append-only in this phase; no edit or delete required by spec.
+- Delete: remove transactions—either all (full wipe) or a selected subset (checkbox-selected). Persisted ledger must reflect removals immediately.
 
 ---
 

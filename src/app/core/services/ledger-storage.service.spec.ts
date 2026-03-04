@@ -43,4 +43,47 @@ describe('LedgerStorageService', () => {
     expect(second.added).toBe(0);
     expect(second.skippedAsDuplicate).toBe(1);
   });
+
+  it('should return distinct account names', async () => {
+    await service.addTransactions(
+      [
+        { date: '2025-03-01', description: 'A', amount: 1 },
+        { date: '2025-03-02', description: 'B', amount: 2 },
+      ],
+      'Checking'
+    );
+    await service.addTransactions([{ date: '2025-03-03', description: 'C', amount: 3 }], 'Savings');
+    const names = await service.getDistinctAccountNames();
+    expect(names).toContain('Checking');
+    expect(names).toContain('Savings');
+    expect(names.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('should clearAll leave store empty', async () => {
+    await service.addTransactions(
+      [{ date: '2025-04-01', description: 'X', amount: 0 }],
+      'ClearTest'
+    );
+    await service.clearAll();
+    const all = await service.getAll();
+    expect(all.length).toBe(0);
+  });
+
+  it('should deleteByIds remove only specified ids', async () => {
+    await service.clearAll();
+    await service.addTransactions(
+      [
+        { date: '2025-05-01', description: 'One', amount: 1 },
+        { date: '2025-05-02', description: 'Two', amount: 2 },
+      ],
+      'DelTest'
+    );
+    const all = await service.getAll();
+    expect(all.length).toBe(2);
+    const idToRemove = all[0].id;
+    await service.deleteByIds([idToRemove]);
+    const after = await service.getAll();
+    expect(after.length).toBe(1);
+    expect(after[0].id).not.toBe(idToRemove);
+  });
 });

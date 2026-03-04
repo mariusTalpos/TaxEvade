@@ -28,7 +28,7 @@ Wells Fargo CSV exports are comma-delimited with **quoted** fields. There is **n
 
 ## Parser Output
 
-Each valid row MUST be mapped to the **normalized transaction** shape (see `normalized-transaction.md`). The parser does NOT set `id` or `account`; the import pipeline assigns `id` and sets `account` from import context (user input or default).
+Each valid row MUST be mapped to the **normalized transaction** shape (see `normalized-transaction.md`). The parser does NOT set `id` or `account`; the import pipeline assigns `id` and sets `account` from **user input at import time** (required; no fixed default).
 
 ## Error Handling
 

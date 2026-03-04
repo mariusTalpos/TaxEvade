@@ -8,6 +8,8 @@ alwaysApply: true
 Auto-generated from all feature plans. Last updated: 2026-03-04
 
 ## Active Technologies
+- TypeScript 5.4+ + Angular 18+ (standalone components, signals), Angular Material or CDK for dialogs (if used) (001-csv-ledger-import)
+- IndexedDB (browser); transaction store with indexes on date, account, and composite for deduplication (001-csv-ledger-import)
 
 - TypeScript 5.4+ (Angular 18+) + Angular 18+ (standalone components, signals, Angular CLI or Nx) (001-csv-ledger-import)
 
@@ -28,6 +30,8 @@ npm test; npm run lint
 TypeScript 5.4+ (Angular 18+): Follow standard conventions
 
 ## Recent Changes
+- 001-csv-ledger-import: Added TypeScript 5.4+ + Angular 18+ (standalone components, signals), Angular Material or CDK for dialogs (if used)
+- 001-csv-ledger-import: Added TypeScript 5.4+ + Angular 18+ (standalone components, signals), Angular Material or CDK for dialogs (if used)
 
 - 001-csv-ledger-import: Added TypeScript 5.4+ (Angular 18+) + Angular 18+ (standalone components, signals, Angular CLI or Nx)
 

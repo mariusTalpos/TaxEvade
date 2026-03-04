@@ -5,11 +5,19 @@
 **Status**: Draft  
 **Input**: User description: "Build a single-user app that imports bank transaction CSV files (starting with Wells Fargo exports) and turns them into a clean local ledger. The user can select a CSV file, the app parses and normalizes transactions into a standard format (date, description, amount, inflow/outflow, account). The app deduplicates transactions on re-import and shows a searchable, filterable list. This phase is only about import + viewing transactions; no tax calculations yet."
 
+## Clarifications
+
+### Session 2026-03-04
+
+- Q: What important capabilities are missing from the current implementation? → A: (1) The ability to clear the ledger—both a full wipe and checkbox-select delete. (2) The ability to declare the account name—the app must ask for user input at import time instead of populating a fixed value (e.g. "Wells Fargo").
+- Q: Should the app require explicit confirmation before destructive actions (full wipe and/or delete selected)? → A: Require confirmation for both full wipe and delete selected.
+- Q: Should we help users avoid typos when entering account names? → A: Yes; keep a list of account names used and prepopulate the input with old inputs to prevent typos.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Import CSV into Ledger (Priority: P1)
 
-The user selects a bank transaction CSV file (Wells Fargo format initially). The app parses the file, normalizes each row into a standard transaction format (date, description, amount, inflow/outflow, account), and adds the transactions to a single local ledger. The user sees confirmation that the import completed and how many transactions were added.
+The user selects a bank transaction CSV file (Wells Fargo format initially). The app prompts the user for an account name (e.g. "Wells Fargo Checking" or "Checking") and does not use a fixed default. The app keeps a list of previously used account names and prepopulates or suggests them when prompting (e.g. dropdown or autocomplete) so the user can pick an existing name or type a new one, reducing typos. The app parses the file, normalizes each row into a standard transaction format (date, description, amount, inflow/outflow, account), assigns the user-provided account name to all transactions from that import, and adds the transactions to a single local ledger. The user sees confirmation that the import completed and how many transactions were added.
 
 **Why this priority**: Import is the foundation; without it there is no ledger to view or search.
 
@@ -17,9 +25,10 @@ The user selects a bank transaction CSV file (Wells Fargo format initially). The
 
 **Acceptance Scenarios**:
 
-1. **Given** the app is open with an empty ledger, **When** the user selects a valid Wells Fargo CSV file and confirms import, **Then** all transactions from the file appear in the ledger with normalized date, description, amount, inflow/outflow, and account.
-2. **Given** the app has an existing ledger, **When** the user imports another CSV file, **Then** the new transactions are appended to the ledger and the user is informed how many were added.
-3. **Given** the user has chosen a file, **When** the file is in an unsupported or invalid format, **Then** the user sees a clear error message and no partial or incorrect data is added to the ledger.
+1. **Given** the app is open with an empty ledger, **When** the user is prompted for an account name, provides it, selects a valid Wells Fargo CSV file, and confirms import, **Then** all transactions from the file appear in the ledger with normalized date, description, amount, inflow/outflow, and the user-provided account name.
+2. **Given** the app has an existing ledger, **When** the user imports another CSV file (and provides an account name when prompted), **Then** the new transactions are appended to the ledger with that account name and the user is informed how many were added.
+3. **Given** the ledger has transactions with one or more account names, **When** the user starts an import and is prompted for an account name, **Then** the app offers previously used account names (e.g. as suggestions or in a dropdown) so the user can select one or type a new name.
+4. **Given** the user has chosen a file, **When** the file is in an unsupported or invalid format, **Then** the user sees a clear error message and no partial or incorrect data is added to the ledger.
 
 ---
 
@@ -40,7 +49,23 @@ The user can view the full list of transactions in the ledger. The list supports
 
 ---
 
-### User Story 3 - Deduplicate on Re-import (Priority: P3)
+### User Story 3 - Clear Ledger (Priority: P3)
+
+The user can remove transactions from the ledger in two ways: (1) **Full wipe**—clear all transactions in the ledger at once. (2) **Checkbox select**—select one or more transactions via checkboxes and delete only the selected transactions. The system MUST require explicit user confirmation before performing either action (e.g. “Clear all transactions? This cannot be undone.” / “Delete N selected transaction(s)?”). After the user confirms and the action completes, the list updates immediately and the removed transactions are no longer in the ledger.
+
+**Why this priority**: Allows users to correct mistakes, remove test data, or start over without re-installing the app.
+
+**Independent Test**: Can be tested by importing transactions, then performing a full wipe and verifying the ledger is empty; and by importing again, selecting a subset via checkboxes, deleting selected, and verifying only those are removed.
+
+**Acceptance Scenarios**:
+
+1. **Given** the ledger has transactions, **When** the user triggers a full wipe (clear all) and confirms in the confirmation dialog, **Then** all transactions are removed and the ledger is empty; the list view reflects this.
+2. **Given** the ledger has transactions, **When** the user selects one or more transactions via checkboxes, triggers delete selected, and confirms in the confirmation dialog, **Then** only the selected transactions are removed; all others remain.
+3. **Given** the user has selected transactions for deletion (or triggered full wipe), **When** the action completes, **Then** the UI updates immediately and no removed transaction appears in the list or in persisted storage.
+
+---
+
+### User Story 4 - Deduplicate on Re-import (Priority: P4)
 
 When the user imports a CSV file that contains transactions already present in the ledger (e.g., re-importing the same file or a file with overlapping data), the app detects duplicates and does not add them again. The user is informed how many transactions were new vs skipped as duplicates.
 
@@ -77,13 +102,18 @@ When the user imports a CSV file that contains transactions already present in t
 - **FR-009**: The system MUST provide filters (e.g., by date range, account, inflow vs outflow) so the user can narrow the visible set.
 - **FR-010**: The system MUST provide pagination for the transaction list with a user-selectable number of rows per page (e.g., 25, 50, 100) so the list remains usable for large ledgers.
 - **FR-011**: The system MUST show clear, user-friendly error messages when the selected file is invalid, unsupported, or unreadable.
-- **FR-012**: The system MUST not perform any tax calculations or tax-specific logic in this phase; scope is limited to import and viewing.
+- **FR-012**: The system MUST prompt the user for an account name at import time and MUST use that value for all transactions from that import; the system MUST NOT default to a fixed label (e.g. "Wells Fargo") without user input.
+- **FR-017**: The system MUST keep a list of account names that have been used (e.g. derived from distinct account values in the ledger) and MUST prepopulate or suggest these when prompting for account name at import (e.g. dropdown, datalist, or autocomplete) so the user can select a previous name or enter a new one, to reduce typos.
+- **FR-013**: The system MUST allow the user to clear the entire ledger (full wipe) so that all transactions are permanently removed.
+- **FR-014**: The system MUST allow the user to select one or more transactions via checkboxes and delete only the selected transactions, leaving the rest of the ledger intact.
+- **FR-015**: The system MUST require explicit user confirmation before executing a full wipe or before deleting selected transactions (e.g. a dialog that the user must accept or cancel). The confirmation dialog (or equivalent UI component) MUST have a dedicated spec file with smoke and key behavior tests per project standards.
+- **FR-016**: The system MUST not perform any tax calculations or tax-specific logic in this phase; scope is limited to import, viewing, and clearing/deleting transactions.
 
 ### Key Entities
 
 - **Transaction**: A single bank transaction. Key attributes: date, description, amount, direction (inflow/outflow), and account. Represents one row of normalized data from an import.
 - **Ledger**: The user’s single local collection of all imported transactions. Persisted across sessions; grows by appending new transactions from imports (after deduplication).
-- **Account**: The source account for a transaction. The CSV does not contain account information; the account name is supplied by the user at import time (e.g., a label such as "Checking" or "Wells Fargo Checking"). Used for display and filtering; no multi-account hierarchy or linking required in this phase.
+- **Account**: The source account for a transaction. The CSV does not contain account information; the account name MUST be supplied by the user when importing (e.g., a label such as "Checking" or "Wells Fargo Checking"). The app must prompt for this value and must not substitute a fixed default. The app keeps a list of previously used account names (e.g. derived from existing transactions) and offers them when prompting so the user can pick or type; this reduces typos. Used for display and filtering; no multi-account hierarchy or linking required in this phase.
 
 ## Assumptions
 
@@ -92,6 +122,7 @@ When the user imports a CSV file that contains transactions already present in t
 - The app is single-user and local-only; no cloud sync, multi-device, or authentication.
 - Search, filter, and pagination (with user-selectable rows per page) are required for list usability; the list remains usable for typical and larger export sizes.
 - Invalid or malformed rows can be skipped with a summary to the user, unless the whole file is deemed unsupported.
+- The list of account names offered when prompting at import can be derived from distinct account values already stored in the ledger (no separate persisted list required unless the implementation prefers one).
 
 ## Success Criteria *(mandatory)*
 
