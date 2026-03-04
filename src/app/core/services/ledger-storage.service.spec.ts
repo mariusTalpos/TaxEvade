@@ -86,4 +86,68 @@ describe('LedgerStorageService', () => {
     expect(after.length).toBe(1);
     expect(after[0].id).not.toBe(idToRemove);
   });
+
+  it('should return addedTransactions from addTransactions', async () => {
+    await service.clearAll();
+    const rows: TransactionRow[] = [
+      { date: '2025-06-01', description: 'Added1', amount: 1 },
+      { date: '2025-06-02', description: 'Added2', amount: 2 },
+    ];
+    const result = await service.addTransactions(rows, 'AddTest');
+    expect(result.added).toBe(2);
+    expect(result.addedTransactions).toBeDefined();
+    expect(result.addedTransactions!.length).toBe(2);
+    expect(result.addedTransactions!.every((t) => t.id && t.account === 'AddTest')).toBe(true);
+  });
+
+  it('should getUnclassified return only transactions without classificationType', async () => {
+    await service.clearAll();
+    await service.addTransactions(
+      [
+        { date: '2025-07-01', description: 'U1', amount: 1 },
+        { date: '2025-07-02', description: 'U2', amount: 2 },
+      ],
+      'Unclass'
+    );
+    const unclass = await service.getUnclassified();
+    expect(unclass.length).toBeGreaterThanOrEqual(2);
+    expect(unclass.every((t) => t.classificationType == null)).toBe(true);
+  });
+
+  it('should getClassified return only transactions with classificationType set', async () => {
+    await service.clearAll();
+    await service.addTransactions(
+      [{ date: '2025-08-01', description: 'C1', amount: 1 }],
+      'ClassTest'
+    );
+    const all = await service.getAll();
+    const id = all[0].id;
+    await service.updateClassification(id, {
+      classificationType: 'expense',
+      classificationCategory: 'Food',
+    });
+    const classified = await service.getClassified();
+    expect(classified.some((t) => t.id === id && t.classificationType === 'expense')).toBe(true);
+  });
+
+  it('should updateClassification only write classification fields (no user-defined rules)', async () => {
+    await service.clearAll();
+    await service.addTransactions(
+      [{ date: '2025-09-01', description: 'Update', amount: 1 }],
+      'UpdateTest'
+    );
+    const all = await service.getAll();
+    const id = all[0].id;
+    await service.updateClassification(id, {
+      classificationType: 'income',
+      classificationCategory: 'Pay',
+      classificationNotes: 'Note',
+    });
+    const after = await service.getAll();
+    const tx = after.find((t) => t.id === id);
+    expect(tx?.classificationType).toBe('income');
+    expect(tx?.classificationCategory).toBe('Pay');
+    expect(tx?.classificationNotes).toBe('Note');
+    expect(tx?.description).toBe('Update');
+  });
 });

@@ -8,5 +8,10 @@ export const routes: Routes = [
         (m) => m.LedgerPageComponent
       ),
   },
+  {
+    path: 'classification',
+    loadChildren: () =>
+      import('./features/classification/classification.routes').then((m) => m.classificationRoutes),
+  },
   { path: '', redirectTo: 'ledger', pathMatch: 'full' },
 ];
