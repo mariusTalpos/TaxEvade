@@ -12,6 +12,8 @@ Auto-generated from all feature plans. Last updated: 2026-03-04
 - IndexedDB (browser); transaction store with indexes on date, account, and composite for deduplication (001-csv-ledger-import)
 - TypeScript 5.4+ + Angular 18+ (standalone components, signals), Angular Material or CDK (tables, dialogs if needed) (002-guided-transaction-classification)
 - IndexedDB (browser); extends existing transaction store with classification fields and suggestion metadata; no new stores for rules (built-in heuristics are code/config). (002-guided-transaction-classification)
+- TypeScript 5.4+ + Angular 18+ (standalone components, signals), Angular Material or CDK (tables, pagination, sort, filter) (003-classified-transactions-view)
+- IndexedDB (browser); reuses existing transaction store and classification fields from 002; no new stores. (003-classified-transactions-view)
 
 - TypeScript 5.4+ (Angular 18+) + Angular 18+ (standalone components, signals, Angular CLI or Nx) (001-csv-ledger-import)
 
@@ -32,8 +34,8 @@ npm test; npm run lint
 TypeScript 5.4+ (Angular 18+): Follow standard conventions
 
 ## Recent Changes
+- 003-classified-transactions-view: Added TypeScript 5.4+ + Angular 18+ (standalone components, signals), Angular Material or CDK (tables, pagination, sort, filter)
 - 002-guided-transaction-classification: Added TypeScript 5.4+ + Angular 18+ (standalone components, signals), Angular Material or CDK (tables, dialogs if needed)
-- 001-csv-ledger-import: Added TypeScript 5.4+ + Angular 18+ (standalone components, signals), Angular Material or CDK for dialogs (if used)
 - 001-csv-ledger-import: Added TypeScript 5.4+ + Angular 18+ (standalone components, signals), Angular Material or CDK for dialogs (if used)
 
 
