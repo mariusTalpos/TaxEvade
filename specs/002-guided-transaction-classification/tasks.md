@@ -25,8 +25,8 @@
 
 **Purpose**: Add classification feature structure and route stub.
 
-- [ ] T001 Add classification feature folder and lazy route stub in `src/app/features/classification/classification.routes.ts` with empty component placeholder
-- [ ] T002 [P] Add nav entry or link to classification feature in app shell (e.g. `src/app/app.routes.ts` or shell component)
+- [x] T001 Add classification feature folder and lazy route stub in `src/app/features/classification/classification.routes.ts` with empty component placeholder
+- [x] T002 [P] Add nav entry or link to classification feature in app shell (e.g. `src/app/app.routes.ts` or shell component)
 
 ---
 
@@ -36,14 +36,14 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T003 [P] Add ClassificationType, Confidence, ClassificationSuggestion, and TransactionWithClassification types plus confidenceAtOrAbove(c, threshold) helper in `src/app/core/models/transaction.model.ts` (or new `src/app/core/models/classification.model.ts`) per contracts/classification-transaction.md
-- [ ] T003b [P] Add classification config file at `src/assets/config/classification-config.json` with at least a `categories` array (and optionally heuristic data such as merchant lists or patterns); add a small service or loader to read the config (e.g. HttpClient) and expose categories (and heuristic data) to ClassificationHeuristicsService and UI; document format in quickstart or code comments
-- [ ] T004 Extend IndexedDB schema in ledger storage: add classification fields to transaction store and indexes for classificationType and classificationCategory (or isClassified) in `src/app/core/services/ledger-storage.service.ts`
-- [ ] T005 Extend ledger-storage.service: add getUnclassified(), getClassified(), updateClassification(transactionId, classification) and ensure Transaction type includes classification/suggestion fields in `src/app/core/services/ledger-storage.service.ts`
-- [ ] T006 Create ClassificationHeuristicsService with suggest(transaction) returning ClassificationSuggestion | null; implement pipeline runner (first match or highest confidence) and at least one stub heuristic so suggestions can be produced; consume categories/heuristic data from classification config in `src/app/core/services/classification-heuristics.service.ts`
-- [ ] T007 Hook import flow to run heuristics after new transactions are added: in the component or service that performs import (e.g. ledger-page container or the service that calls addTransactions after CSV parse), for each new transaction call classificationHeuristicsService.suggest() and persist suggestion fields on the transaction in the store
-- [ ] T008 [P] Add unit tests for ClassificationHeuristicsService (smoke + suggest returns null or suggestion, pipeline order) in `src/app/core/services/classification-heuristics.service.spec.ts`
-- [ ] T009 [P] Add unit tests for ledger-storage getUnclassified, getClassified, updateClassification in `src/app/core/services/ledger-storage.service.spec.ts`
+- [x] T003 [P] Add ClassificationType, Confidence, ClassificationSuggestion, and TransactionWithClassification types plus confidenceAtOrAbove(c, threshold) helper in `src/app/core/models/transaction.model.ts` (or new `src/app/core/models/classification.model.ts`) per contracts/classification-transaction.md
+- [x] T003b [P] Add classification config file at `src/assets/config/classification-config.json` with at least a `categories` array (and optionally heuristic data such as merchant lists or patterns); add a small service or loader to read the config (e.g. HttpClient) and expose categories (and heuristic data) to ClassificationHeuristicsService and UI; document format in quickstart or code comments
+- [x] T004 Extend IndexedDB schema in ledger storage: add classification fields to transaction store and indexes for classificationType and classificationCategory (or isClassified) in `src/app/core/services/ledger-storage.service.ts`
+- [x] T005 Extend ledger-storage.service: add getUnclassified(), getClassified(), updateClassification(transactionId, classification) and ensure Transaction type includes classification/suggestion fields in `src/app/core/services/ledger-storage.service.ts`
+- [x] T006 Create ClassificationHeuristicsService with suggest(transaction) returning ClassificationSuggestion | null; implement pipeline runner (first match or highest confidence) and at least one stub heuristic so suggestions can be produced; consume categories/heuristic data from classification config in `src/app/core/services/classification-heuristics.service.ts`
+- [x] T007 Hook import flow to run heuristics after new transactions are added: in the component or service that performs import (e.g. ledger-page container or the service that calls addTransactions after CSV parse), for each new transaction call classificationHeuristicsService.suggest() and persist suggestion fields on the transaction in the store
+- [x] T008 [P] Add unit tests for ClassificationHeuristicsService (smoke + suggest returns null or suggestion, pipeline order) in `src/app/core/services/classification-heuristics.service.spec.ts`
+- [x] T009 [P] Add unit tests for ledger-storage getUnclassified, getClassified, updateClassification in `src/app/core/services/ledger-storage.service.spec.ts`
 
 **Checkpoint**: Foundation ready — types, storage, heuristics runner, and import hook in place. User story implementation can begin.
 
@@ -57,18 +57,18 @@
 
 ### Tests for User Story 1
 
-- [ ] T010 [P] [US1] Add classification-page container spec: smoke and load unclassified list in `src/app/features/classification/containers/classification-page/classification-page.component.spec.ts`
-- [ ] T011 [P] [US1] Add classification-table component spec: smoke and row selection / display suggestion in `src/app/features/classification/components/classification-table/classification-table.component.spec.ts`
+- [x] T010 [P] [US1] Add classification-page container spec: smoke and load unclassified list in `src/app/features/classification/containers/classification-page/classification-page.component.spec.ts`
+- [x] T011 [P] [US1] Add classification-table component spec: smoke and row selection / display suggestion in `src/app/features/classification/components/classification-table/classification-table.component.spec.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T012 [US1] Implement classification-page container: load unclassified via ledger-storage, signals for list/pagination/sort/filter/selectedTransactionId, pass to table in `src/app/features/classification/containers/classification-page/classification-page.component.ts`
-- [ ] T013 [P] [US1] Implement classification-table presentational component: paginated table (e.g. Angular Material Table or CDK), sort, filter, row selection, display transaction + suggestion (type, category, confidence, sourceId), optional inline edit in `src/app/features/classification/components/classification-table/classification-table.component.ts`
-- [ ] T014 [US1] Add Submit (current) action: validate category required when type is income/expense before calling updateClassification; on Submit click, update only selected transaction with current suggestion/edit via ledger-storage.updateClassification; disable Submit when no row selected in `src/app/features/classification/containers/classification-page/classification-page.component.ts`
-- [ ] T015 [US1] Add Submit All action: validate category for income/expense for each transaction before update; classify all unclassified transactions across all pages that have a suggestion (or user edit) via ledger-storage; then refresh unclassified list in `src/app/features/classification/containers/classification-page/classification-page.component.ts`
-- [ ] T016 [US1] Add Submit by confidence buttons (High only, Medium or higher, Low or higher): filter unclassified by confidence threshold using confidenceAtOrAbove helper, update those transactions, then refresh list in `src/app/features/classification/containers/classification-page/classification-page.component.ts`
-- [ ] T017 [US1] Ensure classification view repopulates after any submit (reload unclassified list or empty state) in `src/app/features/classification/containers/classification-page/classification-page.component.ts`
-- [ ] T018 [US1] Wire classification route to classification-page and ensure lazy load works in `src/app/features/classification/classification.routes.ts`
+- [x] T012 [US1] Implement classification-page container: load unclassified via ledger-storage, signals for list/pagination/sort/filter/selectedTransactionId, pass to table in `src/app/features/classification/containers/classification-page/classification-page.component.ts`
+- [x] T013 [P] [US1] Implement classification-table presentational component: paginated table (e.g. Angular Material Table or CDK), sort, filter, row selection, display transaction + suggestion (type, category, confidence, sourceId), optional inline edit in `src/app/features/classification/components/classification-table/classification-table.component.ts`
+- [x] T014 [US1] Add Submit (current) action: validate category required when type is income/expense before calling updateClassification; on Submit click, update only selected transaction with current suggestion/edit via ledger-storage.updateClassification; disable Submit when no row selected in `src/app/features/classification/containers/classification-page/classification-page.component.ts`
+- [x] T015 [US1] Add Submit All action: validate category for income/expense for each transaction before update; classify all unclassified transactions across all pages that have a suggestion (or user edit) via ledger-storage; then refresh unclassified list in `src/app/features/classification/containers/classification-page/classification-page.component.ts`
+- [x] T016 [US1] Add Submit by confidence buttons (High only, Medium or higher, Low or higher): filter unclassified by confidence threshold using confidenceAtOrAbove helper, update those transactions, then refresh list in `src/app/features/classification/containers/classification-page/classification-page.component.ts`
+- [x] T017 [US1] Ensure classification view repopulates after any submit (reload unclassified list or empty state) in `src/app/features/classification/containers/classification-page/classification-page.component.ts`
+- [x] T018 [US1] Wire classification route to classification-page and ensure lazy load works in `src/app/features/classification/classification.routes.ts`
 
 **Checkpoint**: User Story 1 complete. Classification view is fully functional and independently testable.
 

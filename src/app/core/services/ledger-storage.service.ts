@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
+import type { ClassificationType } from '../models/classification.model';
 import { Transaction, ImportResult, TransactionRow } from '../models/transaction';
 
 const DB_NAME = 'TaxEvadeLedger';
 const STORE_NAME = 'transactions';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 function generateId(): string {
   return typeof crypto !== 'undefined' && crypto.randomUUID
@@ -44,6 +45,17 @@ export class LedgerStorageService {
           const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
           store.createIndex('date', 'date', { unique: false });
           store.createIndex('account', 'account', { unique: false });
+        } else if (event.oldVersion < 2) {
+          const tx = (event.target as IDBOpenDBRequest).transaction!;
+          const store = tx.objectStore(STORE_NAME);
+          if (!store.indexNames.contains('classificationType')) {
+            store.createIndex('classificationType', 'classificationType', { unique: false });
+          }
+          if (!store.indexNames.contains('classificationCategory')) {
+            store.createIndex('classificationCategory', 'classificationCategory', {
+              unique: false,
+            });
+          }
         }
       };
     });
@@ -93,6 +105,61 @@ export class LedgerStorageService {
     });
   }
 
+  /** Updates a transaction with partial fields (e.g. classification or suggestion). Does not create user-defined rules. */
+  async updateTransaction(
+    id: string,
+    updates: Partial<
+      Pick<
+        Transaction,
+        | 'classificationType'
+        | 'classificationCategory'
+        | 'classificationNotes'
+        | 'suggestionType'
+        | 'suggestionCategory'
+        | 'suggestionConfidence'
+        | 'suggestionSourceId'
+      >
+    >
+  ): Promise<void> {
+    const db = await this.openDb();
+    const existing = await this.getAll();
+    const tx = existing.find((t) => t.id === id);
+    if (!tx) return;
+    const updated: Transaction = { ...tx, ...updates };
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORE_NAME, 'readwrite');
+      const store = transaction.objectStore(STORE_NAME);
+      store.put(updated);
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+    });
+  }
+
+  async updateClassification(
+    transactionId: string,
+    classification: {
+      classificationType: ClassificationType;
+      classificationCategory?: string;
+      classificationNotes?: string;
+    }
+  ): Promise<void> {
+    await this.updateTransaction(transactionId, classification);
+  }
+
+  async getUnclassified(): Promise<Transaction[]> {
+    const all = await this.getAll();
+    return all.filter((t) => t.classificationType == null);
+  }
+
+  async getClassified(): Promise<Transaction[]> {
+    const all = await this.getAll();
+    return all.filter(
+      (t) =>
+        t.classificationType != null &&
+        ['income', 'expense', 'transfer', 'ignore'].includes(t.classificationType)
+    );
+  }
+
   async addTransactions(rows: TransactionRow[], account: string): Promise<ImportResult> {
     const db = await this.openDb();
     const existing = await this.getAll();
@@ -132,6 +199,7 @@ export class LedgerStorageService {
         resolve({
           added: toAdd.length,
           skippedAsDuplicate,
+          addedTransactions: toAdd,
         });
       tx.onerror = () => reject(tx.error);
     });

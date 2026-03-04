@@ -1,7 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { LedgerPageComponent } from './ledger-page.component';
 import { LedgerStorageService } from '../../../../core/services/ledger-storage.service';
 import { CsvParserService } from '../../../../core/services/csv-parser.service';
+import { ClassificationHeuristicsService } from '../../../../core/services/classification-heuristics.service';
 
 describe('LedgerPageComponent', () => {
   let component: LedgerPageComponent;
@@ -9,8 +11,15 @@ describe('LedgerPageComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [LedgerPageComponent],
-      providers: [LedgerStorageService, CsvParserService],
+      imports: [LedgerPageComponent, HttpClientTestingModule],
+      providers: [
+        LedgerStorageService,
+        CsvParserService,
+        {
+          provide: ClassificationHeuristicsService,
+          useValue: { suggest: () => Promise.resolve(null) },
+        },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(LedgerPageComponent);
