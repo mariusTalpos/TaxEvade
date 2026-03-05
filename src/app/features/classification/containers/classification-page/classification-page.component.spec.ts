@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideRouter } from '@angular/router';
 import { ClassificationPageComponent } from './classification-page.component';
 import { LedgerStorageService } from '../../../../core/services/ledger-storage.service';
 import { ClassificationConfigService } from '../../../../core/services/classification-config.service';
@@ -28,7 +29,11 @@ describe('ClassificationPageComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ClassificationPageComponent, HttpClientTestingModule],
-      providers: [LedgerStorageService, ClassificationConfigService],
+      providers: [
+        LedgerStorageService,
+        ClassificationConfigService,
+        provideRouter([]),
+      ],
     }).compileComponents();
 
     const storage = TestBed.inject(LedgerStorageService);

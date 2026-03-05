@@ -23,7 +23,7 @@
 
 **Purpose**: Ensure route and entry point for the edit-classifications (classified transactions) view.
 
-- [ ] T001 Add edit-classifications route in src/app/features/classification/classification.routes.ts (path `edit`, loadComponent lazy-loading edit-classifications-page)
+- [x] T001 Add edit-classifications route in src/app/features/classification/classification.routes.ts (path `edit`, loadComponent lazy-loading edit-classifications-page)
 
 ---
 
@@ -33,7 +33,7 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T002 Add clearClassification(transactionId: string) to LedgerStorageService in src/app/core/services/ledger-storage.service.ts that sets classificationType, classificationCategory, classificationNotes to undefined and persists via existing store; add unit test in src/app/core/services/ledger-storage.service.spec.ts
+- [x] T002 Add clearClassification(transactionId: string) to LedgerStorageService in src/app/core/services/ledger-storage.service.ts that sets classificationType, classificationCategory, classificationNotes to undefined and persists via existing store; add unit test in src/app/core/services/ledger-storage.service.spec.ts
 
 **Checkpoint**: Foundation ready – edit-classifications implementation can proceed.
 
@@ -47,17 +47,17 @@
 
 ### Implementation for User Story 1
 
-- [ ] T003 [P] [US1] Create edit-classifications-page container in src/app/features/classification/containers/edit-classifications-page/ (standalone, signals, OnPush) with template that hosts the classified table and filter/sort UI
-- [ ] T004 [US1] In edit-classifications-page load classified list via LedgerStorageService.getClassified() on init and expose as signal (e.g. classifiedList) in src/app/features/classification/containers/edit-classifications-page/edit-classifications-page.component.ts
-- [ ] T005 [P] [US1] Create edit-classifications-table presentational component in src/app/features/classification/components/edit-classifications-table/ (standalone, inputs: transactions, selection, filter/sort state; outputs: selectionChange; OnPush)
-- [ ] T006 [US1] In edit-classifications-table implement table display columns: date, description, amount, classificationType, classificationCategory, classificationNotes; show empty state message when transactions list is empty in src/app/features/classification/components/edit-classifications-table/edit-classifications-table.component.ts
-- [ ] T007 [US1] Add filter state (by classification type, by category) and derived filtered list in edit-classifications-page; pass filter state and filtered list to edit-classifications-table
-- [ ] T008 [US1] Add sort state (column, direction) and apply sort to filtered list (date, amount, classificationType, category) in edit-classifications-page
+- [x] T003 [P] [US1] Create edit-classifications-page container in src/app/features/classification/containers/edit-classifications-page/ (standalone, signals, OnPush) with template that hosts the classified table and filter/sort UI
+- [x] T004 [US1] In edit-classifications-page load classified list via LedgerStorageService.getClassified() on init and expose as signal (e.g. classifiedList) in src/app/features/classification/containers/edit-classifications-page/edit-classifications-page.component.ts
+- [x] T005 [P] [US1] Create edit-classifications-table presentational component in src/app/features/classification/components/edit-classifications-table/ (standalone, inputs: transactions, selection, filter/sort state; outputs: selectionChange; OnPush)
+- [x] T006 [US1] In edit-classifications-table implement table display columns: date, description, amount, classificationType, classificationCategory, classificationNotes; show empty state message when transactions list is empty in src/app/features/classification/components/edit-classifications-table/edit-classifications-table.component.ts
+- [x] T007 [US1] Add filter state (by classification type, by category) and derived filtered list in edit-classifications-page; pass filter state and filtered list to edit-classifications-table
+- [x] T008 [US1] Add sort state (column, direction) and apply sort to filtered list (date, amount, classificationType, category) in edit-classifications-page
 
 ### Tests for User Story 1
 
-- [ ] T009 [P] [US1] Add edit-classifications-page.component.spec.ts with smoke test and test that getClassified is called and list is displayed; test empty state when getClassified returns []
-- [ ] T010 [P] [US1] Add edit-classifications-table.component.spec.ts with smoke test and tests for display of rows and empty state when no transactions
+- [x] T009 [P] [US1] Add edit-classifications-page.component.spec.ts with smoke test and test that getClassified is called and list is displayed; test empty state when getClassified returns []
+- [x] T010 [P] [US1] Add edit-classifications-table.component.spec.ts with smoke test and tests for display of rows and empty state when no transactions
 
 **Checkpoint**: User Story 1 complete – user can view classified list with filter and sort; empty state works.
 
@@ -71,16 +71,16 @@
 
 ### Implementation for User Story 2
 
-- [ ] T011 [US2] In edit-classifications-page add selection state (selectedTransactionId signal) and draft state (draftType, draftCategory, draftNotes signals) for the selected row; discard draft on selection change and on route leave (ngOnDestroy) in src/app/features/classification/containers/edit-classifications-page/edit-classifications-page.component.ts
-- [ ] T012 [US2] Implement Save in edit-classifications-page: when type is income or expense require non-empty category (trim); if invalid show validation message and do not persist; otherwise call updateClassification or updateTransaction; after save refresh list (getClassified()) and clear draft in src/app/features/classification/containers/edit-classifications-page/edit-classifications-page.component.ts
-- [ ] T013 [US2] Implement Clear classification in edit-classifications-page: when user chooses Clear, call LedgerStorageService.clearClassification(selectedTransactionId), then refresh list so transaction is removed from view in src/app/features/classification/containers/edit-classifications-page/edit-classifications-page.component.ts
-- [ ] T014 [US2] Wire edit-classifications-table with selection (input selectedId, output selectionChange), inline edit controls for type (dropdown), category (dropdown/input from config), notes (input), and Save and Clear buttons; bind draft values and emit changes to parent in src/app/features/classification/components/edit-classifications-table/edit-classifications-table.component.ts
-- [ ] T015 [US2] Load allowed categories from classification config (e.g. classification-config.json or existing 002 mechanism) in edit-classifications-page and pass to edit-classifications-table for type and category controls
+- [x] T011 [US2] In edit-classifications-page add selection state (selectedTransactionId signal) and draft state (draftType, draftCategory, draftNotes signals) for the selected row; discard draft on selection change and on route leave (ngOnDestroy) in src/app/features/classification/containers/edit-classifications-page/edit-classifications-page.component.ts
+- [x] T012 [US2] Implement Save in edit-classifications-page: when type is income or expense require non-empty category (trim); if invalid show validation message and do not persist; otherwise call updateClassification or updateTransaction; after save refresh list (getClassified()) and clear draft in src/app/features/classification/containers/edit-classifications-page/edit-classifications-page.component.ts
+- [x] T013 [US2] Implement Clear classification in edit-classifications-page: when user chooses Clear, call LedgerStorageService.clearClassification(selectedTransactionId), then refresh list so transaction is removed from view in src/app/features/classification/containers/edit-classifications-page/edit-classifications-page.component.ts
+- [x] T014 [US2] Wire edit-classifications-table with selection (input selectedId, output selectionChange), inline edit controls for type (dropdown), category (dropdown/input from config), notes (input), and Save and Clear buttons; bind draft values and emit changes to parent in src/app/features/classification/components/edit-classifications-table/edit-classifications-table.component.ts
+- [x] T015 [US2] Load allowed categories from classification config (e.g. classification-config.json or existing 002 mechanism) in edit-classifications-page and pass to edit-classifications-table for type and category controls
 
 ### Tests for User Story 2
 
-- [ ] T016 [P] [US2] In edit-classifications-page.component.spec.ts add tests for save (persist and refresh), clear classification (transaction removed from list), validation (income/expense without category shows message and does not persist), discard on selection change and on destroy
-- [ ] T017 [P] [US2] In edit-classifications-table.component.spec.ts add tests for selection change emission, draft binding, Save and Clear button emission
+- [x] T016 [P] [US2] In edit-classifications-page.component.spec.ts add tests for save (persist and refresh), clear classification (transaction removed from list), validation (income/expense without category shows message and does not persist), discard on selection change and on destroy. Per constitution §6 option-value coverage: include tests that a transaction with classificationType **income** displays as income when selected and that saving with type **income** calls updateClassification with classificationType: 'income' (and equivalent coverage for draft/getDraft reflecting income).
+- [x] T017 [P] [US2] In edit-classifications-table.component.spec.ts add tests for selection change emission, draft binding, Save and Clear button emission. Per constitution §6: include test that getDraft() reflects type **income** when input is income and after user changes type to income.
 
 **Checkpoint**: User Story 2 complete – edit, save, clear, validation, and discard-on-navigate work.
 
@@ -94,12 +94,12 @@
 
 ### Implementation for User Story 3
 
-- [ ] T018 [US3] Add pagination (e.g. MatPaginator or CDK) to edit-classifications-page: apply to filtered/sorted list with configurable page size (e.g. 25); pass paginated slice to edit-classifications-table in src/app/features/classification/containers/edit-classifications-page/edit-classifications-page.component.ts
-- [ ] T019 [US3] Ensure sort and filter are applied before pagination and sort order is preserved when changing page in edit-classifications-page
+- [x] T018 [US3] Add pagination (e.g. MatPaginator or CDK) to edit-classifications-page: apply to filtered/sorted list with configurable page size (e.g. 25); pass paginated slice to edit-classifications-table in src/app/features/classification/containers/edit-classifications-page/edit-classifications-page.component.ts
+- [x] T019 [US3] Ensure sort and filter are applied before pagination and sort order is preserved when changing page in edit-classifications-page
 
 ### Tests for User Story 3
 
-- [ ] T020 [P] [US3] In edit-classifications-page.component.spec.ts add tests for pagination (page size, page change) and that sort order is preserved across page changes
+- [x] T020 [P] [US3] In edit-classifications-page.component.spec.ts add tests for pagination (page size, page change) and that sort order is preserved across page changes
 
 **Checkpoint**: User Story 3 complete – list is usable at scale with pagination.
 
@@ -109,8 +109,8 @@
 
 **Purpose**: Navigation from classification feature to edit view; validate against quickstart.
 
-- [ ] T021 [P] Add link or button from classification-page to edit-classifications view (e.g. "Edit classifications" or "Classified transactions") in src/app/features/classification/containers/classification-page/classification-page.component.ts (and template) pointing to route `edit` or `/classification/edit`
-- [ ] T022 Run quickstart.md validation: open app, navigate to edit-classifications, verify view list, filter, sort, edit, save, clear, empty state, and discard on navigate per quickstart steps
+- [x] T021 [P] Add link or button from classification-page to edit-classifications view (e.g. "Edit classifications" or "Classified transactions") in src/app/features/classification/containers/classification-page/classification-page.component.ts (and template) pointing to route `edit` or `/classification/edit`
+- [x] T022 Run quickstart.md validation: open app, navigate to edit-classifications, verify view list, filter, sort, edit, save, clear, empty state, and discard on navigate per quickstart steps
 
 ---
 

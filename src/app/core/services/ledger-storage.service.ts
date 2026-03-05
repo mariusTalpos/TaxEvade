@@ -146,6 +146,15 @@ export class LedgerStorageService {
     await this.updateTransaction(transactionId, classification);
   }
 
+  /** Clears classification for a transaction so it becomes unclassified (removed from edit-classifications view). */
+  async clearClassification(transactionId: string): Promise<void> {
+    await this.updateTransaction(transactionId, {
+      classificationType: undefined,
+      classificationCategory: undefined,
+      classificationNotes: undefined,
+    });
+  }
+
   async getUnclassified(): Promise<Transaction[]> {
     const all = await this.getAll();
     return all.filter((t) => t.classificationType == null);

@@ -13,6 +13,7 @@
 - Q: What should happen when the user clears classification and category on a transaction? → A: The transaction is treated as unclassified: it is removed from this (003) view and then appears in the 002 classification view as unclassified.
 - Q: Are multiple users or tabs editing the same data in scope? → A: No. This is a local app only; there are no multiple users editing the same tab, so concurrent-edit conflict resolution is out of scope.
 - Q: When the user has unsaved edits and navigates away, what should the app do? → A: Discard. In-memory edits are dropped and the user is not prompted.
+- Q: (Bug report) Type column shows "expense" for items submitted as "income"; editing to income saves as expense. Spec or code? → A: Code bug. The spec requires that classification type display and persist exactly as chosen (income, expense, transfer, ignore). The fix is in the implementation: the type (and category) control must reflect the current draft and persist the user’s selection exactly.
 
 ## User Scenarios & Testing *(mandatory)*
 
