@@ -63,4 +63,39 @@ describe('ClassificationTableComponent', () => {
     component.onSelectNone();
     expect(emitted).toBeNull();
   });
+
+  it('should display classification when present (income and category)', () => {
+    const withClassification: Transaction[] = [
+      {
+        id: 'tx-2',
+        date: '2025-01-20',
+        description: 'Salary',
+        amount: 3000,
+        account: 'Checking',
+        classificationType: 'income',
+        classificationCategory: 'Salary',
+        suggestionSourceId: 'ollama',
+        suggestionConfidence: 'Medium',
+      },
+    ];
+    fixture.componentRef.setInput('transactions', withClassification);
+    fixture.componentRef.setInput('totalItems', 1);
+    fixture.componentRef.setInput('edits', {});
+    fixture.detectChanges();
+    expect(component.effectiveType(withClassification[0])).toBe('income');
+    expect(component.effectiveCategory(withClassification[0])).toBe('Salary');
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.textContent).toContain('Salary');
+    expect(el.textContent).toContain('Medium');
+    expect(el.textContent).toContain('ollama');
+  });
+
+  it('should emit edits when type or category changes', () => {
+    let emitted: Record<string, { type: 'income' | 'expense' | 'transfer' | 'ignore'; category: string; notes: string }> = {};
+    component.editsChange.subscribe((e) => (emitted = e));
+    component.onTypeChange('tx-1', { target: { value: 'income' } } as unknown as Event);
+    expect(emitted['tx-1']?.type).toBe('income');
+    component.onCategoryChange('tx-1', { target: { value: 'Salary' } } as unknown as Event);
+    expect(emitted['tx-1']?.category).toBe('Salary');
+  });
 });

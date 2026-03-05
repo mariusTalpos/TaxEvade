@@ -10,6 +10,10 @@
 ### Session 2026-03-04
 
 - Q: Is the "import" the CSV import from feature 001? → A: Yes. The import referred to throughout this spec is the CSV import into the ledger from feature 001 (csv-ledger-import). Auto-classification runs when that import completes (or as part of it).
+- Q: When should the ledger list update after CSV import? → A: The ledger list MUST refresh immediately after import completes (without requiring a browser refresh). The UI must reload transactions from storage and update the list so newly added rows are visible right away.
+- Q: Where are classification type and category stored? → A: They are persisted on the same Transaction in IndexedDB: classificationType, classificationCategory, and suggestion metadata (suggestionType, suggestionCategory, suggestionConfidence, suggestionSourceId). Auto-classification writes these via updateTransaction after each import; the Classification view reads them. If auto-classification fails for some rows, those remain without type/category until the user sets them in the Classification view.
+- Q: Should the Ledger view show the same classification columns as the Classification view? → A: Yes. The Ledger table MUST display Type and Category (and optionally other classification-related columns) so the user can see classification at a glance without switching views. Column set should align with the Classification view (e.g. Date, Description, Amount, Account, Type, Category).
+- Q: Should auto-classification run in parallel to speed up large imports? → A: Yes. The system SHOULD run auto-classification with bounded parallelism (e.g. a limited number of concurrent classification tasks per batch) so that importing many transactions (e.g. 300+) does not take proportionally longer than a small batch. Each transaction still receives at most one classification; correctness and persistence semantics are unchanged. Exact concurrency limit is implementation-defined.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -70,7 +74,8 @@ The primary workflow becomes: ingest CSV → system auto-classifies → user ope
 - What happens when the user clears classification and saves? The transaction becomes unclassified and stays in the same view (e.g. visible when filtering for unclassified) so the user can re-classify in place.
 - What happens when the user edits a transaction but navigates away without saving? The system discards in-memory edits and does not prompt; only explicit save persists changes.
 - What happens when there are no transactions (or none in the current filter)? The view shows an empty state with a clear message; the user can change filters or navigate elsewhere.
-- How are conflicts or duplicates handled on import? Out of scope for this spec; existing ledger/import behavior already removes duplicates
+- How are conflicts or duplicates handled on import? Out of scope for this spec; existing ledger/import behavior already removes duplicates.
+- When auto-classification runs in parallel, the order in which results are persisted is unspecified; the user sees the final state when the ledger list is refreshed after the import (and classification run) completes.
 
 ## Requirements *(mandatory)*
 
@@ -87,6 +92,9 @@ The primary workflow becomes: ingest CSV → system auto-classifies → user ope
 - **FR-009**: The system MAY provide bulk actions (e.g. accept all suggestions at or above a given confidence) so the user can confirm many classifications at once; the exact actions are implementation-defined but MUST NOT create user-defined rules.
 - **FR-010**: When the user navigates away without saving, the system MUST discard in-memory edits and MUST NOT prompt to save; only explicit save persists changes.
 - **FR-011**: When auto-classification is unavailable or fails for some transactions, the system MUST still complete the import and MUST present those transactions in the single view as unclassified (or with a clear "pending" state) so the user can classify them manually.
+- **FR-012**: The ledger list MUST refresh immediately after CSV import completes so that newly added transactions are visible without a browser refresh. Failure of auto-classification MUST NOT prevent the ledger list from updating.
+- **FR-013**: The Ledger view MUST display Type and Category (and, where applicable, the same classification-related columns as the Classification view) for each transaction so users can see classification without leaving the Ledger.
+- **FR-014**: Auto-classification for newly imported transactions SHOULD run with bounded parallelism (e.g. a limited number of concurrent classification tasks) so that large imports (e.g. hundreds of rows) complete in less wall-clock time than strictly sequential processing. Each transaction still receives at most one classification; correctness, persistence, and failure handling (FR-011) are unchanged. The concurrency limit is implementation-defined (e.g. to avoid overloading the AI service or the browser).
 
 ### Key Entities
 
@@ -113,3 +121,4 @@ The primary workflow becomes: ingest CSV → system auto-classifies → user ope
 - **SC-003**: The time and number of manual actions required to go from "CSV imported" to "all transactions reviewed or corrected" are reduced compared to the previous workflow (ingest → manual classify → review/edit); the reduction is measurable by fewer user steps and less data entry per transaction.
 - **SC-004**: When auto-classification is unavailable, users can still import data and classify all transactions manually within the same single view; the app does not block import or require a different flow.
 - **SC-005**: The single view loads and responds to filter, sort, and edit actions within a reasonable time (e.g. under 2 seconds for typical dataset sizes) so users can verify and correct without noticeable delay.
+- **SC-006**: For large imports (e.g. hundreds of transactions), the time from import start to "ledger list refreshed with all classifications" is reduced by running auto-classification with bounded parallelism where possible, so that users are not blocked by strictly sequential classification.

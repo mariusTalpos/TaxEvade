@@ -36,7 +36,7 @@ See 002 data-model.md and contracts. Relevant for 004:
 
 - **Single classification view**: Filter (all | unclassified | by type | by category), sort (column, direction), pagination (page index, page size). Applied over the full transaction list (or a cached slice). Selection (selected row id), draft (type, category, notes) for the selected row, in-memory until Save. Discard draft on navigate or selection change (no prompt).
 - **Bulk actions** (optional): e.g. "Accept all high confidence" over the current filtered list; implementation-defined.
-- **Auto-classification at import**: No separate UI state; runs in the import path (ledger-page or AutoClassificationService) after addTransactions; persists classification and suggestion fields per transaction.
+- **Auto-classification at import**: No separate UI state; runs in the import path (ledger-page or AutoClassificationService) after addTransactions; persists classification and suggestion fields per transaction. Execution may use **bounded parallelism** (e.g. a fixed number of concurrent classification tasks) so large imports complete in less wall-clock time; each transaction still receives at most one classification (FR-014).
 
 ---
 

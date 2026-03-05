@@ -3,6 +3,8 @@
 **Input**: Design documents from `/specs/004-consolidate-classification-view/`  
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/
 
+**Scope**: Includes **parallel classification** (FR-014, SC-006): bounded parallelism in auto-classification so large imports complete in less wall-clock time (Phase 3 tasks T023–T024).
+
 **Tests**: Per project constitution (`.specify/memory/constitution.md`), every component and service MUST have a spec file with smoke and key behavior tests. Test tasks are included for each user story.
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
@@ -23,7 +25,7 @@
 
 **Purpose**: Verify project baseline before feature work
 
-- [ ] T001 Verify project structure and 001/002/003 baseline per plan in specs/004-consolidate-classification-view/plan.md (ledger, classification feature, LedgerStorageService, ClassificationHeuristicsService, classification.routes.ts)
+- [x] T001 Verify project structure and 001/002/003 baseline per plan in specs/004-consolidate-classification-view/plan.md (ledger, classification feature, LedgerStorageService, ClassificationHeuristicsService, classification.routes.ts)
 
 ---
 
@@ -33,7 +35,7 @@
 
 **⚠️ CRITICAL**: No user story implementation can begin until this phase is complete.
 
-- [ ] T002 Verify LedgerStorageService.getAll and updateTransaction support classification and suggestion fields in src/app/core/services/ledger-storage.service.ts (002/003 contract; no code change if already present)
+- [x] T002 Verify LedgerStorageService.getAll and updateTransaction support classification and suggestion fields in src/app/core/services/ledger-storage.service.ts (002/003 contract; no code change if already present)
 
 **Checkpoint**: Foundation ready — user story implementation can begin
 
@@ -47,17 +49,22 @@
 
 ### Tests for User Story 1
 
-- [ ] T003 [P] [US1] Add ClassificationAiService spec with smoke test and tests for suggest() returning null on timeout/error in src/app/core/services/classification-ai.service.spec.ts
-- [ ] T004 [P] [US1] Add AutoClassificationService spec with runAndPersist applying heuristics result and AI fallback in src/app/core/services/auto-classification.service.spec.ts
-- [ ] T005 [US1] Add ledger-page tests for auto-classification after addTransactions (runAndPersist called, UI refreshed) in src/app/features/ledger/containers/ledger-page/ledger-page.component.spec.ts
+- [x] T003 [P] [US1] Add ClassificationAiService spec with smoke test and tests for suggest() returning null on timeout/error in src/app/core/services/classification-ai.service.spec.ts
+- [x] T004 [P] [US1] Add AutoClassificationService spec with runAndPersist applying heuristics result and AI fallback in src/app/core/services/auto-classification.service.spec.ts
+- [x] T005 [US1] Add ledger-page tests for auto-classification after addTransactions (runAndPersist called, UI refreshed) in src/app/features/ledger/containers/ledger-page/ledger-page.component.spec.ts
 
 ### Implementation for User Story 1
 
-- [ ] T006 [P] [US1] Create ClassificationAiService with suggest(tx): Promise<ClassificationSuggestion | null>, timeout and graceful null on failure in src/app/core/services/classification-ai.service.ts
-- [ ] T007 [US1] Create AutoClassificationService with runAndPersist(added: Transaction[]) using heuristics first then AI, apply and persist via LedgerStorageService in src/app/core/services/auto-classification.service.ts
-- [ ] T008 [US1] In ledger-page after addTransactions success call AutoClassificationService.runAndPersist(result.addedTransactions) then set importResult and refresh transactions in src/app/features/ledger/containers/ledger-page/ledger-page.component.ts
+- [x] T006 [P] [US1] Create ClassificationAiService with suggest(tx): Promise<ClassificationSuggestion | null>, timeout and graceful null on failure in src/app/core/services/classification-ai.service.ts
+- [x] T007 [US1] Create AutoClassificationService with runAndPersist(added: Transaction[]) using heuristics first then AI, apply and persist via LedgerStorageService in src/app/core/services/auto-classification.service.ts
+- [x] T008 [US1] In ledger-page after addTransactions success call AutoClassificationService.runAndPersist(result.addedTransactions) then set importResult and refresh transactions in src/app/features/ledger/containers/ledger-page/ledger-page.component.ts
 
-**Checkpoint**: User Story 1 complete — import applies classifications; single view can show them once US2 is done
+### Parallel classification (FR-014, SC-006)
+
+- [x] T023 [US1] Implement bounded parallelism in AutoClassificationService.runAndPersist: process added transactions with a concurrency limit (e.g. 5–10) so large imports complete in less wall-clock time; each transaction still gets at most one classification; preserve logging and per-transaction failure handling in src/app/core/services/auto-classification.service.ts
+- [x] T024 [P] [US1] Extend AutoClassificationService spec to verify runAndPersist with multiple transactions completes and each transaction receives at most one classification (and pipeline semantics unchanged) in src/app/core/services/auto-classification.service.spec.ts
+
+**Checkpoint**: User Story 1 complete — import applies classifications (with parallel execution for large batches); single view can show them once US2 is done
 
 ---
 
@@ -69,17 +76,17 @@
 
 ### Tests for User Story 2
 
-- [ ] T009 [P] [US2] Update classification-page spec for loading all transactions, filter (all/unclassified/type/category), sort, pagination in src/app/features/classification/containers/classification-page/classification-page.component.spec.ts
-- [ ] T010 [P] [US2] Update classification-table spec for display of source/confidence, inline edit, Save, Clear, category validation for income/expense in src/app/features/classification/components/classification-table/classification-table.component.spec.ts
+- [x] T009 [P] [US2] Update classification-page spec for loading all transactions, filter (all/unclassified/type/category), sort, pagination in src/app/features/classification/containers/classification-page/classification-page.component.spec.ts
+- [x] T010 [P] [US2] Update classification-table spec for display of source/confidence, inline edit, Save, Clear, category validation for income/expense in src/app/features/classification/components/classification-table/classification-table.component.spec.ts
 
 ### Implementation for User Story 2
 
-- [ ] T011 [US2] Update classification.routes.ts to single route '' loading ClassificationPageComponent and remove edit route in src/app/features/classification/classification.routes.ts
-- [ ] T012 [US2] Refactor classification-page to load all transactions (getAll), add filter state (all | unclassified | by type | by category), sort, pagination, selection, draft in src/app/features/classification/containers/classification-page/classification-page.component.ts
-- [ ] T013 [US2] Refactor classification-table to show all transactions with type, category, notes, and suggestionSourceId/suggestionConfidence when present in src/app/features/classification/components/classification-table/classification-table.component.ts
-- [ ] T014 [US2] Add inline edit, Save, Clear classification and category validation (income/expense) in classification-table in src/app/features/classification/components/classification-table/classification-table.component.ts
-- [ ] T015 [US2] Ensure discard on navigate or selection change without Save (no prompt) and refresh list after save in src/app/features/classification/containers/classification-page/classification-page.component.ts
-- [ ] T016 [US2] Remove edit-classifications route and delete or deprecate edit-classifications-page and edit-classifications-table in src/app/features/classification/containers/edit-classifications-page/ and src/app/features/classification/components/edit-classifications-table/
+- [x] T011 [US2] Update classification.routes.ts to single route '' loading ClassificationPageComponent and remove edit route in src/app/features/classification/classification.routes.ts
+- [x] T012 [US2] Refactor classification-page to load all transactions (getAll), add filter state (all | unclassified | by type | by category), sort, pagination, selection, draft in src/app/features/classification/containers/classification-page/classification-page.component.ts
+- [x] T013 [US2] Refactor classification-table to show all transactions with type, category, notes, and suggestionSourceId/suggestionConfidence when present in src/app/features/classification/components/classification-table/classification-table.component.ts
+- [x] T014 [US2] Add inline edit, Save, Clear classification and category validation (income/expense) in classification-table in src/app/features/classification/components/classification-table/classification-table.component.ts
+- [x] T015 [US2] Ensure discard on navigate or selection change without Save (no prompt) and refresh list after save in src/app/features/classification/containers/classification-page/classification-page.component.ts
+- [x] T016 [US2] Remove edit-classifications route and delete or deprecate edit-classifications-page and edit-classifications-table in src/app/features/classification/containers/edit-classifications-page/ and src/app/features/classification/components/edit-classifications-table/
 
 **Checkpoint**: User Stories 1 and 2 complete — single view is the only classification entry point; review and edit workflow in one place
 
@@ -93,11 +100,11 @@
 
 ### Tests for User Story 3
 
-- [ ] T017 [P] [US3] Add tests for bulk accept high confidence in classification-page spec in src/app/features/classification/containers/classification-page/classification-page.component.spec.ts
+- [x] T017 [P] [US3] Add tests for bulk accept high confidence in classification-page spec in src/app/features/classification/containers/classification-page/classification-page.component.spec.ts
 
 ### Implementation for User Story 3
 
-- [ ] T018 [US3] Add bulk action Accept all high confidence to classification-page (apply classification for filtered list where suggestionConfidence === 'High') in src/app/features/classification/containers/classification-page/classification-page.component.ts
+- [x] T018 [US3] Add bulk action Accept all high confidence to classification-page (apply classification for filtered list where suggestionConfidence === 'High') in src/app/features/classification/containers/classification-page/classification-page.component.ts
 
 **Checkpoint**: All user stories complete; bulk actions reduce manual steps
 
@@ -107,10 +114,10 @@
 
 **Purpose**: Validation, coverage, and cleanup
 
-- [ ] T019 [P] Run quickstart validation per specs/004-consolidate-classification-view/quickstart.md (import CSV, open classification, verify workflow)
-- [ ] T020 [P] Add option-value coverage for at least two classification types (e.g. income and expense) for display and persistence in src/app/features/classification/components/classification-table/classification-table.component.spec.ts
-- [ ] T021 Code cleanup: remove dead code, ensure OnPush and signals throughout classification feature in src/app/features/classification/
-- [ ] T022 Update app navigation to single Classification entry if edit link existed in src/app/app.component.html or app routes
+- [x] T019 [P] Run quickstart validation per specs/004-consolidate-classification-view/quickstart.md (import CSV, open classification, verify workflow)
+- [x] T020 [P] Add option-value coverage for at least two classification types (e.g. income and expense) for display and persistence in src/app/features/classification/components/classification-table/classification-table.component.spec.ts
+- [x] T021 Code cleanup: remove dead code, ensure OnPush and signals throughout classification feature in src/app/features/classification/
+- [x] T022 Update app navigation to single Classification entry if edit link existed in src/app/app.component.html or app routes
 
 ---
 
@@ -141,6 +148,7 @@
 
 - T003, T004 (US1 tests) can run in parallel
 - T006 (ClassificationAiService) and T007 (AutoClassificationService) — T007 depends on T006 if it injects AI service; otherwise T006 can be parallel to T007. T007 needs heuristics + storage; T006 is standalone. So T006 [P], T007 after T006 (or parallel if AI is optional and T007 uses only heuristics first). Mark T006 [P].
+- T024 (US1 parallel-classification test) is [P]; T023 (bounded parallelism implementation) depends on T008 and is sequential within US1.
 - T009, T010 (US2 tests) can run in parallel
 - T019, T020, T021, T022 (Polish) where marked [P] can run in parallel
 
@@ -154,6 +162,9 @@ T003 + T004 (specs for AI service and auto-classification service)
 T006 (ClassificationAiService) — parallel to any other file-only task
 T007 (AutoClassificationService) — after T006 if using AI; can start once heuristics contract is clear
 T008 (ledger-page wire) — after T007
+# Parallel classification (FR-014):
+T024 (extend auto-classification spec for multi-transaction runAndPersist) — can run in parallel to T023
+T023 (bounded parallelism in runAndPersist) — after T008; implement concurrency limit (e.g. p-limit style)
 ```
 
 ---
@@ -189,15 +200,15 @@ T011 (routes) then T012 (page refactor) then T013–T015 (table and behavior) th
 
 ### Task Summary
 
-- **Total task count**: 22  
+- **Total task count**: 24  
 - **Phase 1**: 1 task  
 - **Phase 2**: 1 task  
-- **Phase 3 (US1)**: 6 tasks (3 test, 3 implementation)  
+- **Phase 3 (US1)**: 8 tasks (3 test, 3 implementation, 2 parallel-classification)  
 - **Phase 4 (US2)**: 8 tasks (2 test, 6 implementation)  
 - **Phase 5 (US3)**: 2 tasks (1 test, 1 implementation)  
 - **Phase 6 (Polish)**: 4 tasks  
 
-**Suggested MVP scope**: Phases 1–4 (Setup through User Story 2). User Story 3 (bulk actions) and Polish can follow.
+**Suggested MVP scope**: Phases 1–4 (Setup through User Story 2). User Story 3 (bulk actions) and Polish can follow. Parallel classification (T023–T024) can be done after T008 or with US2.
 
 ---
 

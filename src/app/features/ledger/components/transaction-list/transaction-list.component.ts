@@ -25,6 +25,8 @@ import { Transaction } from '../../../../core/models/transaction';
           <th>Amount</th>
           <th>In/Out</th>
           <th>Account</th>
+          <th>Type</th>
+          <th>Category</th>
         </tr>
       </thead>
       <tbody>
@@ -43,10 +45,12 @@ import { Transaction } from '../../../../core/models/transaction';
             <td>{{ t.amount | number: '1.2-2' }}</td>
             <td>{{ t.amount >= 0 ? 'In' : 'Out' }}</td>
             <td>{{ t.account }}</td>
+            <td>{{ typeLabel(t) }}</td>
+            <td>{{ categoryLabel(t) }}</td>
           </tr>
         } @empty {
           <tr>
-            <td colspan="6">No transactions to show.</td>
+            <td colspan="8">No transactions to show.</td>
           </tr>
         }
       </tbody>
@@ -102,6 +106,16 @@ export class TransactionListComponent {
   readonly selectedIds = input<string[]>([]);
 
   readonly selectionChange = output<string[]>();
+
+  typeLabel(t: Transaction): string {
+    const type = t.classificationType ?? t.suggestionType;
+    return type ?? '—';
+  }
+
+  categoryLabel(t: Transaction): string {
+    const cat = t.classificationCategory ?? t.suggestionCategory;
+    return (cat?.trim()) ?? '—';
+  }
 
   isSelected(id: string): boolean {
     return this.selectedIds().includes(id);

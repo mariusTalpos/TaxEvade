@@ -3,24 +3,31 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { LedgerPageComponent } from './ledger-page.component';
 import { LedgerStorageService } from '../../../../core/services/ledger-storage.service';
 import { CsvParserService } from '../../../../core/services/csv-parser.service';
-import { ClassificationHeuristicsService } from '../../../../core/services/classification-heuristics.service';
+import { AutoClassificationService } from '../../../../core/services/auto-classification.service';
 
 describe('LedgerPageComponent', () => {
   let component: LedgerPageComponent;
   let fixture: ComponentFixture<LedgerPageComponent>;
+  let autoClassification: jasmine.SpyObj<Pick<AutoClassificationService, 'runAndPersist'>>;
 
   beforeEach(async () => {
+    const autoClassificationSpy = jasmine.createSpyObj('AutoClassificationService', [
+      'runAndPersist',
+    ]);
+    autoClassificationSpy.runAndPersist.and.returnValue(Promise.resolve());
+
     await TestBed.configureTestingModule({
       imports: [LedgerPageComponent, HttpClientTestingModule],
       providers: [
         LedgerStorageService,
         CsvParserService,
-        {
-          provide: ClassificationHeuristicsService,
-          useValue: { suggest: () => Promise.resolve(null) },
-        },
+        { provide: AutoClassificationService, useValue: autoClassificationSpy },
       ],
     }).compileComponents();
+
+    autoClassification = TestBed.inject(AutoClassificationService) as unknown as jasmine.SpyObj<
+      Pick<AutoClassificationService, 'runAndPersist'>
+    >;
 
     fixture = TestBed.createComponent(LedgerPageComponent);
     component = fixture.componentInstance;
@@ -41,6 +48,8 @@ describe('LedgerPageComponent', () => {
   });
 
   it('should add transactions and set result on valid CSV when account name set', async () => {
+    const storage = TestBed.inject(LedgerStorageService);
+    await storage.clearAll();
     component.accountName.set('TestAccount');
     const csv = `"12/31/2025","-18.12","*","","ONLINE TRANSFER"`;
     const file = new File([csv], 'test.csv', { type: 'text/csv' });
@@ -50,6 +59,21 @@ describe('LedgerPageComponent', () => {
     expect(result).not.toBeNull();
     expect(result?.error).toBeUndefined();
     expect(result?.added).toBe(1);
+  });
+
+  it('should call runAndPersist with added transactions after import and refresh list', async () => {
+    const storage = TestBed.inject(LedgerStorageService);
+    await storage.clearAll();
+    component.accountName.set('TestAccount');
+    const csv = `"12/31/2025","-18.12","*","","ONLINE TRANSFER"`;
+    const file = new File([csv], 'test.csv', { type: 'text/csv' });
+    await component.onFileSelected(file);
+    fixture.detectChanges();
+    expect(autoClassification.runAndPersist).toHaveBeenCalled();
+    const added = (autoClassification.runAndPersist as jasmine.Spy).calls.mostRecent().args[0];
+    expect(added.length).toBe(1);
+    expect(added[0].description).toBe('ONLINE TRANSFER');
+    expect(component.transactions().length).toBeGreaterThanOrEqual(1);
   });
 
   it('should show error when file selected without account name', async () => {

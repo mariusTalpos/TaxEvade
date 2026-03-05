@@ -71,3 +71,18 @@
 - New fields for "appliedFromSource": Redundant; we can show the suggestion* fields that were used when applying at import.
 
 **Implementation note**: After applying classification at import, persist both classification* and suggestion* (same values and source/confidence). View reads suggestionSourceId and suggestionConfidence for display; if missing (e.g. manual edit), show "Manual" or nothing.
+
+---
+
+## 6. Bounded Parallelism for Auto-Classification (FR-014, SC-006)
+
+**Decision**: Run auto-classification for newly imported transactions with **bounded parallelism**: a fixed number of concurrent classification tasks (e.g. 5–10) so that many transactions are processed in parallel without overloading the AI service (Ollama) or the browser. Each transaction still gets at most one classification; persistence order is unspecified; the ledger list refreshes after the full batch completes. The concurrency limit is implementation-defined (e.g. configurable constant or small pool).
+
+**Rationale**: Spec FR-014 and SC-006 require that large imports (e.g. hundreds of rows) complete in less wall-clock time than strictly sequential processing. Sequential execution makes 300 transactions take roughly 300 × (rule time + optional AI time), which is unacceptable. Bounded concurrency (e.g. Promise.all with a concurrency helper, or a pool of N workers) keeps correctness and failure semantics (FR-011) unchanged while reducing total time. Limiting concurrency avoids hammering Ollama with hundreds of simultaneous requests and keeps memory and CPU manageable in the browser.
+
+**Alternatives considered**:
+- Unbounded parallelism (all at once): Rejected; risks overloading Ollama and the browser.
+- Strictly sequential: Rejected; spec explicitly asks for faster large imports.
+- Batching only (no concurrency): Would still serialize within each batch; bounded concurrency is the intended approach.
+
+**Implementation note**: In AutoClassificationService.runAndPersist(added), process `added` with a concurrency limit (e.g. p-limit style: run up to N classify-and-persist tasks at a time; when one finishes, start the next). Each task: for one transaction, run heuristics → if null run AI → if suggestion persist via updateTransaction. Logging (rules matched / AI used / nothing matched) remains per transaction. No new entities or API changes; only the execution order and concurrency of the existing pipeline change.

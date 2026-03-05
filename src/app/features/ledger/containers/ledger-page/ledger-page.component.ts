@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { LedgerStorageService } from '../../../../core/services/ledger-storage.service';
 import { CsvParserService } from '../../../../core/services/csv-parser.service';
-import { ClassificationHeuristicsService } from '../../../../core/services/classification-heuristics.service';
+import { AutoClassificationService } from '../../../../core/services/auto-classification.service';
 import { ImportFilePickerComponent } from '../../components/import-file-picker/import-file-picker.component';
 import { TransactionListComponent } from '../../components/transaction-list/transaction-list.component';
 import {
@@ -148,7 +148,7 @@ const DEFAULT_PAGE_SIZE = 25;
 export class LedgerPageComponent implements OnInit {
   private readonly storage = inject(LedgerStorageService);
   private readonly parser = inject(CsvParserService);
-  private readonly heuristics = inject(ClassificationHeuristicsService);
+  private readonly autoClassification = inject(AutoClassificationService);
 
   readonly importResult = signal<ImportResult | null>(null);
   readonly transactions = signal<Transaction[]>([]);
@@ -295,23 +295,16 @@ export class LedgerPageComponent implements OnInit {
       return;
     }
     const result = await this.storage.addTransactions(parseResult.rows, account);
-    // Run heuristics on newly added transactions and persist suggestions (no user-defined rules)
-    const added = result.addedTransactions ?? [];
-    for (const tx of added) {
-      const suggestion = await this.heuristics.suggest(tx);
-      if (suggestion) {
-        await this.storage.updateTransaction(tx.id, {
-          suggestionType: suggestion.type,
-          suggestionCategory: suggestion.category,
-          suggestionConfidence: suggestion.confidence,
-          suggestionSourceId: suggestion.sourceId,
-        });
-      }
+    try {
+      await this.autoClassification.runAndPersist(result.addedTransactions ?? []);
+    } catch {
+      // Leave transactions unclassified; do not block import or list refresh (FR-011, FR-012)
     }
     this.importResult.set({
       ...result,
       skippedInvalid: parseResult.skippedInvalid,
     });
+    // Always refresh ledger list so new rows appear without browser refresh (FR-012)
     const txs = await this.storage.getAll();
     this.transactions.set(txs);
     this.accountSuggestions.set(await this.storage.getDistinctAccountNames());

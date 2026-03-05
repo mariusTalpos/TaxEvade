@@ -90,7 +90,7 @@ const TYPES: ClassificationType[] = ['income', 'expense', 'transfer', 'ignore'];
           </tr>
         } @empty {
           <tr>
-            <td colspan="10">No unclassified transactions.</td>
+            <td colspan="10">No transactions.</td>
           </tr>
         }
       </tbody>
@@ -163,19 +163,19 @@ export class ClassificationTableComponent {
   effectiveType(t: Transaction): ClassificationType {
     const e = this.edits()[t.id];
     if (e?.type) return e.type;
-    return t.suggestionType ?? 'expense';
+    return (t.classificationType ?? t.suggestionType ?? 'expense') as ClassificationType;
   }
 
   effectiveCategory(t: Transaction): string {
     const e = this.edits()[t.id];
     if (e?.category !== undefined) return e.category;
-    return t.suggestionCategory ?? '';
+    return t.classificationCategory ?? t.suggestionCategory ?? '';
   }
 
   effectiveNotes(t: Transaction): string {
     const e = this.edits()[t.id];
     if (e?.notes !== undefined) return e.notes;
-    return '';
+    return t.classificationNotes ?? '';
   }
 
   onSelectRow(id: string): void {
@@ -209,9 +209,9 @@ export class ClassificationTableComponent {
     const current = this.edits();
     const tx = this.transactions().find((t) => t.id === id);
     const prev = current[id] ?? {
-      type: (tx?.suggestionType ?? 'expense') as ClassificationType,
-      category: tx?.suggestionCategory ?? '',
-      notes: '',
+      type: (tx?.classificationType ?? tx?.suggestionType ?? 'expense') as ClassificationType,
+      category: tx?.classificationCategory ?? tx?.suggestionCategory ?? '',
+      notes: tx?.classificationNotes ?? '',
     };
     const next = { ...prev, [field]: value };
     this.editsChange.emit({ ...current, [id]: next });
