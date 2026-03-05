@@ -130,6 +130,30 @@ describe('LedgerStorageService', () => {
     expect(classified.some((t) => t.id === id && t.classificationType === 'expense')).toBe(true);
   });
 
+  it('should clearClassification make transaction unclassified and appear in getUnclassified', async () => {
+    await service.clearAll();
+    await service.addTransactions(
+      [{ date: '2025-10-01', description: 'ClearMe', amount: 1 }],
+      'ClearClassTest'
+    );
+    const all = await service.getAll();
+    const id = all[0].id;
+    await service.updateClassification(id, {
+      classificationType: 'expense',
+      classificationCategory: 'Food',
+    });
+    let classified = await service.getClassified();
+    expect(classified.some((t) => t.id === id)).toBe(true);
+    await service.clearClassification(id);
+    classified = await service.getClassified();
+    expect(classified.some((t) => t.id === id)).toBe(false);
+    const unclass = await service.getUnclassified();
+    expect(unclass.some((t) => t.id === id)).toBe(true);
+    const tx = unclass.find((t) => t.id === id);
+    expect(tx?.classificationType).toBeUndefined();
+    expect(tx?.classificationCategory).toBeUndefined();
+  });
+
   it('should updateClassification only write classification fields (no user-defined rules)', async () => {
     await service.clearAll();
     await service.addTransactions(

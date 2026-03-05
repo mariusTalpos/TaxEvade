@@ -7,6 +7,7 @@ import {
   effect,
   OnInit,
 } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { ClassificationTableComponent } from '../../components/classification-table/classification-table.component';
 import { LedgerStorageService } from '../../../../core/services/ledger-storage.service';
 import { ClassificationConfigService } from '../../../../core/services/classification-config.service';
@@ -25,10 +26,13 @@ const CONFIDENCE_SUBMIT_OPTIONS: { threshold: Confidence; label: string }[] = [
   selector: 'app-classification-page',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ClassificationTableComponent],
+  imports: [ClassificationTableComponent, RouterLink],
   template: `
     <h1>Classification</h1>
     <p>Review and submit classifications for unclassified transactions.</p>
+    <p>
+      <a routerLink="edit">Edit classifications</a> (view or modify already classified transactions).
+    </p>
 
     @if (loading()) {
       <p>Loading…</p>

@@ -56,6 +56,7 @@ This constitution defines the architectural and quality baseline for the TaxEvad
 - Every component and service MUST have a spec file with at least smoke and key behavior tests.
 - Use Jasmine with Angular Testing Library style (TestBed.configureTestingModule minimal).
 - Aim for 80%+ coverage on logic-heavy code.
+- **Option-value coverage**: When behavior depends on a fixed set of options (e.g. enum or union type such as classification type: income, expense, transfer, ignore), tests MUST verify at least two distinct values for both **display** (correct value shown when stored) and **persistence** (saved value matches user choice). This catches default-value and single-path bugs (e.g. only testing "expense" and missing "income").
 
 ### 7. Code Style & Tooling
 
@@ -95,4 +96,4 @@ Agents MUST NOT:
 - Contradictory specs, plans, or tasks MUST be rejected or rewritten.
 - Version bumps: MAJOR for backward-incompatible principle removals or redefinitions; MINOR for new principles or materially expanded guidance; PATCH for clarifications, wording, and non-semantic refinements.
 
-**Version**: 1.0.0 | **Ratified**: 2026-03-04 | **Last Amended**: 2026-03-04
+**Version**: 1.0.1 | **Ratified**: 2026-03-04 | **Last Amended**: 2026-03-04

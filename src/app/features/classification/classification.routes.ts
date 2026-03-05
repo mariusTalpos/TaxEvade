@@ -8,4 +8,11 @@ export const classificationRoutes: Routes = [
         (m) => m.ClassificationPageComponent
       ),
   },
+  {
+    path: 'edit',
+    loadComponent: () =>
+      import('./containers/edit-classifications-page/edit-classifications-page.component').then(
+        (m) => m.EditClassificationsPageComponent
+      ),
+  },
 ];
